@@ -1,0 +1,46 @@
+{
+  "name": "blueprints",
+  "version": "0.1.0",
+  "description": "Blueprint Software Spec System",
+  "type": "module",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "lint": "eslint src/",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "knip": "knip",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "tailwind-merge": "latest",
+    "es-toolkit": "^1.46.1",
+    "date-fns": "^4.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "@types/node": "latest",
+    "tsx": "latest",
+    "vite": "^8.0.14",
+    "@vitejs/plugin-react": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tailwindcss": "^4.3.0",
+    "@tailwindcss/postcss": "latest",
+    "postcss": "latest",
+    "eslint": "^10.4.0",
+    "@eslint/js": "latest",
+    "typescript-eslint": "latest",
+    "prettier": "^3.8.3",
+    "knip": "^6.14.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5"
+  }
+}
