@@ -1,40 +1,66 @@
-import { useState, useEffect } from 'react';
-import { ChevronRight } from 'lucide-react';
-import { useWorkspaceStore, type FileEntry } from '../store/workspace';
-import { VaultService } from '../services/vault';
-
-interface Backlink {
-  filePath: string;
-  fileName: string;
-  lineContent: string;
-}
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { ChevronRight, Link2 } from 'lucide-react';
+import { VaultService, type BacklinkEntry } from '../services/vault';
+import { useWorkspaceStore } from '../store/workspace';
 
 export function BacklinksPanel() {
-  const { activeTabId, openTabs, vaultPath, fileTree, openFile } = useWorkspaceStore();
-  const activeTab = openTabs.find((t) => t.id === activeTabId);
-  const [backlinks, setBacklinks] = useState<Backlink[]>([]);
+  const [backlinks, setBacklinks] = useState<BacklinkEntry[]>([]);
   const [expanded, setExpanded] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const backlinksCacheRef = useRef<BacklinkEntry[]>([]);
 
-  useEffect(() => {
-    if (!activeTab || !vaultPath) {
+  const vaultPath = useWorkspaceStore((s) => s.vaultPath);
+  const openFile = useWorkspaceStore((s) => s.openFile);
+  const activeTabId = useWorkspaceStore((s) => s.activeTabId);
+  const openTabs = useWorkspaceStore((s) => s.openTabs);
+
+  const activeFilePath = useMemo(() => {
+    const tab = openTabs.find((t) => t.id === activeTabId);
+    return tab?.filePath ?? null;
+  }, [activeTabId, openTabs]);
+
+  // Stable filename stem derived from active file
+  const fileName = useMemo(() => {
+    if (!activeFilePath) return null;
+    return (
+      activeFilePath
+        .split('/')
+        .pop()
+        ?.replace(/\.[^.]+$/, '') ?? null
+    );
+  }, [activeFilePath]);
+
+  const refresh = useCallback(async () => {
+    if (!fileName) {
       setBacklinks([]);
+      backlinksCacheRef.current = [];
       return;
     }
-
-    const fileName = activeTab.fileName.replace(/\.[^.]+$/, '');
-    const pattern = `[[${fileName}]]`;
-
-    async function findBacklinks() {
-      const results: Backlink[] = [];
-      await searchTree(fileTree, pattern, activeTab?.filePath ?? '', results);
-      setBacklinks(results);
+    setLoading(true);
+    try {
+      const results = await VaultService.scanBacklinks(fileName);
+      // Filter out self-references
+      const activeRel =
+        activeFilePath && vaultPath ? activeFilePath.replace(vaultPath + '/', '') : '';
+      const filtered = results.filter((r) => r.path !== activeRel);
+      backlinksCacheRef.current = filtered;
+      setBacklinks(filtered);
+    } catch {
+      // Keep cached results on error rather than clearing
+      setBacklinks(backlinksCacheRef.current);
+    } finally {
+      setLoading(false);
     }
+  }, [fileName, activeFilePath, vaultPath]);
 
-    findBacklinks();
-  }, [activeTab?.filePath, vaultPath, fileTree]);
-
-  if (!activeTab) return null;
-  if (activeTab.fileType !== 'md') return null;
+  // Refresh when the active file changes, with a delay to allow previous file to save
+  useEffect(() => {
+    // Immediate scan for cached/fast results
+    refresh();
+    // Delayed re-scan to catch files that were just saved (autosave on tab switch)
+    const timer = setTimeout(() => refresh(), 500);
+    return () => clearTimeout(timer);
+  }, [refresh]);
 
   return (
     <div className="border-t border-default">
@@ -53,54 +79,42 @@ export function BacklinksPanel() {
           </span>
         )}
       </button>
+
       {expanded && (
-        <div className="px-2 pb-2">
-          {backlinks.length === 0 ? (
-            <p className="text-xs text-muted px-2 py-1">No backlinks found.</p>
+        <div className="px-3 pb-3">
+          {loading && backlinks.length === 0 ? (
+            <div className="text-xs text-muted py-2">Scanning...</div>
+          ) : backlinks.length === 0 ? (
+            <div className="text-xs text-muted py-2 flex items-center gap-1.5">
+              <Link2 size={11} />
+              No files link to this page
+            </div>
           ) : (
-            backlinks.map((bl, i) => (
-              <button
-                key={`${bl.filePath}-${i}`}
-                onClick={() => openFile(bl.filePath)}
-                className="w-full text-left px-2 py-1.5 rounded hover:bg-surface-2 flex flex-col gap-0.5"
-              >
-                <span className="text-xs text-secondary truncate">{bl.fileName}</span>
-                <span className="text-xs text-muted truncate">{bl.lineContent}</span>
-              </button>
-            ))
+            <div className="space-y-0.5">
+              {backlinks.map((link, i) => (
+                <button
+                  key={`${link.path}-${link.line_number}-${i}`}
+                  onClick={() => {
+                    if (vaultPath) openFile(`${vaultPath}/${link.path}`);
+                  }}
+                  className="w-full text-left px-2 py-1.5 rounded hover:bg-surface-2 transition-colors group flex items-center gap-2"
+                >
+                  <Link2 size={11} className="text-muted shrink-0" />
+                  <span className="text-xs text-secondary group-hover:text-primary truncate">
+                    {link.path
+                      .split('/')
+                      .pop()
+                      ?.replace(/\.[^.]+$/, '') ?? link.path}
+                  </span>
+                  <span className="text-[10px] text-muted shrink-0 ml-auto">
+                    L{link.line_number}
+                  </span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       )}
     </div>
   );
-}
-
-async function searchTree(
-  entries: FileEntry[],
-  pattern: string,
-  excludePath: string,
-  results: Backlink[],
-) {
-  for (const entry of entries) {
-    if (entry.isDirectory) {
-      if (entry.children) {
-        await searchTree(entry.children, pattern, excludePath, results);
-      }
-    } else if (entry.path !== excludePath && entry.name.endsWith('.md')) {
-      try {
-        const content = await VaultService.readFile(entry.path);
-        if (content.includes(pattern)) {
-          const lines = content.split('\n');
-          const matchLine = lines.find((l) => l.includes(pattern)) ?? '';
-          results.push({
-            filePath: entry.path,
-            fileName: entry.name,
-            lineContent: matchLine.trim(),
-          });
-        }
-      } catch {
-        // skip unreadable files
-      }
-    }
-  }
 }

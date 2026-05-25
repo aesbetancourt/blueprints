@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { templates, type Template } from '../data/templates';
+import { templates, type Template, type TemplateCategory } from '../data/templates';
 import { useWorkspaceStore, type FileEntry } from '../store/workspace';
 import { VaultService } from '../services/vault';
 import { mapFileEntries } from '../utils/mapFileEntries';
@@ -23,6 +23,13 @@ import {
   PenTool,
   Braces,
   File,
+  Bug,
+  RefreshCw,
+  ScrollText,
+  Rocket,
+  Table,
+  GanttChart,
+  PieChart,
 } from 'lucide-react';
 
 interface CreateModalProps {
@@ -36,7 +43,7 @@ const TYPE_COLORS: Record<string, string> = {
   md: 'var(--color-accent)',
   mermaid: 'var(--color-success)',
   excalidraw: 'var(--color-warning)',
-  json: '#3b82f6',
+  json: '#a78bfa',
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -49,6 +56,7 @@ const TYPE_LABELS: Record<string, string> = {
 export function CreateModal({ open, onClose }: CreateModalProps) {
   const [step, setStep] = useState<Step>('template');
   const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState<TemplateCategory>('basics');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [fileName, setFileName] = useState('');
   const [selectedFolder, setSelectedFolder] = useState<string>('');
@@ -77,23 +85,27 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
     return result;
   }, [fileTree, vaultPath]);
 
-  // Filter templates by search
+  // Filter templates by search and category
   const filtered = useMemo(() => {
-    if (!search.trim()) return templates;
-    const q = search.toLowerCase();
-    return templates.filter(
-      (t) =>
-        t.label.toLowerCase().includes(q) ||
-        t.description.toLowerCase().includes(q) ||
-        t.fileType.includes(q),
-    );
-  }, [search]);
+    let list = templates.filter((t) => t.category === activeCategory);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (t) =>
+          t.label.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q) ||
+          t.fileType.includes(q),
+      );
+    }
+    return list;
+  }, [search, activeCategory]);
 
   // Reset on open
   useEffect(() => {
     if (open) {
       setStep('template');
       setSearch('');
+      setActiveCategory('basics');
       setSelectedTemplate(null);
       setFileName('');
       setSelectedFolder('');
@@ -141,7 +153,7 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
   // Reset focus when filter changes
   useEffect(() => {
     setFocusIndex(0);
-  }, [search]);
+  }, [search, activeCategory]);
 
   const handleSelectTemplate = (tmpl: Template) => {
     setSelectedTemplate(tmpl);
@@ -237,6 +249,30 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
               </div>
             </div>
 
+            {/* Category tabs */}
+            <div className="px-4 pt-2 pb-0 flex gap-1">
+              {(
+                [
+                  { id: 'basics', label: 'Basics' },
+                  { id: 'documents', label: 'Documents' },
+                  { id: 'diagrams', label: 'Diagrams' },
+                  { id: 'data', label: 'Data' },
+                ] as const
+              ).map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                    activeCategory === cat.id
+                      ? 'bg-accent/15 text-accent'
+                      : 'text-muted hover:text-secondary hover:bg-surface-2'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
             {/* Template grid */}
             <div className="max-h-[50vh] overflow-y-auto p-3">
               {filtered.length === 0 ? (
@@ -255,29 +291,31 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
                     />
                   ))}
                   {/* New Folder card */}
-                  <button
-                    onClick={() => {
-                      setFileName('');
-                      setStep('folder');
-                    }}
-                    className={`text-left p-3 rounded-lg border border-default hover:border-accent/50 bg-surface-0 transition-all`}
-                  >
-                    <div className="flex items-start justify-between mb-1.5">
-                      <div
-                        className="w-7 h-7 rounded-md flex items-center justify-center"
-                        style={{
-                          backgroundColor:
-                            'color-mix(in srgb, var(--color-text-muted) 15%, transparent)',
-                        }}
-                      >
-                        <FolderClosed size={14} color="var(--color-text-muted)" />
+                  {activeCategory === 'basics' && (
+                    <button
+                      onClick={() => {
+                        setFileName('');
+                        setStep('folder');
+                      }}
+                      className={`text-left p-3 rounded-lg border border-default hover:border-accent/50 bg-surface-0 transition-all`}
+                    >
+                      <div className="flex items-start justify-between mb-1.5">
+                        <div
+                          className="w-7 h-7 rounded-md flex items-center justify-center"
+                          style={{
+                            backgroundColor:
+                              'color-mix(in srgb, var(--color-text-muted) 15%, transparent)',
+                          }}
+                        >
+                          <FolderClosed size={14} color="var(--color-text-muted)" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-xs font-medium text-primary mb-0.5">New Folder</div>
-                    <div className="text-xs text-muted leading-relaxed line-clamp-2">
-                      Create an empty folder
-                    </div>
-                  </button>
+                      <div className="text-xs font-medium text-primary mb-0.5">New Folder</div>
+                      <div className="text-xs text-muted leading-relaxed line-clamp-2">
+                        Create an empty folder
+                      </div>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -584,6 +622,16 @@ function TemplateIconSvg({ icon, color }: { icon: string; color: string }) {
       return <Globe {...iconProps} />;
     case 'ops':
       return <Shield {...iconProps} />;
+    case 'bug':
+      return <Bug {...iconProps} />;
+    case 'refresh':
+      return <RefreshCw {...iconProps} />;
+    case 'scroll':
+      return <ScrollText {...iconProps} />;
+    case 'rocket':
+      return <Rocket {...iconProps} />;
+    case 'table':
+      return <Table {...iconProps} />;
     case 'flow':
       return <Workflow {...iconProps} />;
     case 'sequence':
@@ -594,6 +642,10 @@ function TemplateIconSvg({ icon, color }: { icon: string; color: string }) {
       return <Database {...iconProps} />;
     case 'state':
       return <Circle {...iconProps} />;
+    case 'gantt':
+      return <GanttChart {...iconProps} />;
+    case 'pie':
+      return <PieChart {...iconProps} />;
     case 'canvas':
       return <PenTool {...iconProps} />;
     case 'json':

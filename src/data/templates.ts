@@ -1,29 +1,54 @@
+export type TemplateCategory = 'basics' | 'documents' | 'diagrams' | 'data';
+
 export interface Template {
   id: string;
   label: string;
   description: string;
   fileType: 'md' | 'excalidraw' | 'mermaid' | 'json';
+  category: TemplateCategory;
   content: string;
   icon: string;
   suggestedName: string;
 }
 
 export const templates: Template[] = [
-  // Markdown templates
+  // --- Basics ---
   {
     id: 'md-blank',
     label: 'Blank Document',
     description: 'Empty markdown file',
     fileType: 'md',
+    category: 'basics',
     content: '# Untitled\n\n',
     icon: 'doc',
     suggestedName: 'untitled',
+  },
+  {
+    id: 'mermaid-blank',
+    label: 'Blank Diagram',
+    description: 'Empty mermaid diagram',
+    fileType: 'mermaid',
+    category: 'basics',
+    content: 'graph TD\n    A[Start]\n',
+    icon: 'flow',
+    suggestedName: 'diagram-',
+  },
+  {
+    id: 'json-blank-basic',
+    label: 'Blank JSON',
+    description: 'Empty JSON file',
+    fileType: 'json',
+    category: 'basics',
+    content: '{\n  \n}',
+    icon: 'json',
+    suggestedName: 'data-',
   },
   {
     id: 'md-architecture',
     label: 'Architecture Doc',
     description: 'System architecture template with components, data flow, and decisions',
     fileType: 'md',
+    category: 'documents',
     content: `# Architecture: [System Name]\n\n## Overview\n\nBrief description of the system.\n\n## Goals & Constraints\n\n- Goal 1\n- Constraint 1\n\n## Components\n\n### Component A\n\nDescription and responsibilities.\n\n### Component B\n\nDescription and responsibilities.\n\n## Data Flow\n\nDescribe how data moves through the system.\n\n## Decisions\n\n| Decision | Rationale | Date |\n|----------|-----------|------|\n| | | |\n\n## Open Questions\n\n- [ ] Question 1\n`,
     icon: 'arch',
     suggestedName: 'architecture-',
@@ -33,6 +58,7 @@ export const templates: Template[] = [
     label: 'Decision Record (ADR)',
     description: 'Document an architecture decision with context and consequences',
     fileType: 'md',
+    category: 'documents',
     content: `# ADR-000: [Title]\n\n## Status\n\nProposed\n\n## Context\n\nDescribe the context and problem.\n\n## Decision\n\nDescribe the decision made.\n\n## Consequences\n\n### Positive\n\n- \n\n### Negative\n\n- \n\n### Neutral\n\n- \n`,
     icon: 'decision',
     suggestedName: 'adr-',
@@ -42,6 +68,7 @@ export const templates: Template[] = [
     label: 'Meeting Notes',
     description: 'Agenda, notes, and action items from a meeting',
     fileType: 'md',
+    category: 'documents',
     content: `# Meeting: [Topic]\n\n**Date:** YYYY-MM-DD  \n**Attendees:** \n\n## Agenda\n\n1. \n\n## Notes\n\n\n\n## Action Items\n\n- [ ] \n`,
     icon: 'meeting',
     suggestedName: 'meeting-',
@@ -51,6 +78,7 @@ export const templates: Template[] = [
     label: 'Feature Spec',
     description: 'Full feature specification with user stories, requirements, and timeline',
     fileType: 'md',
+    category: 'documents',
     content: `---\ntags: [feature, draft]\nstatus: draft\n---\n\n# Feature: [Name]\n\n## Summary\n\nOne-paragraph description of what this feature does.\n\n## Motivation\n\nWhy are we building this? What problem does it solve?\n\n## User Stories\n\n- As a [user], I want [goal] so that [reason]\n\n## Requirements\n\n### Must Have\n\n- [ ] \n\n### Nice to Have\n\n- [ ] \n\n## Technical Approach\n\nHigh-level implementation plan.\n\n## API Changes\n\n| Endpoint | Method | Description |\n|----------|--------|-------------|\n| | | |\n\n## UI/UX\n\nDescribe the user interface changes.\n\n## Risks & Open Questions\n\n- [ ] \n\n## Timeline\n\n| Milestone | Target Date |\n|-----------|------------|\n| | |\n`,
     icon: 'feature',
     suggestedName: 'feature-',
@@ -60,6 +88,7 @@ export const templates: Template[] = [
     label: 'API Spec',
     description: 'REST API documentation with endpoints, params, and responses',
     fileType: 'md',
+    category: 'documents',
     content: `---\ntags: [api, draft]\nstatus: draft\n---\n\n# API: [Service Name]\n\n## Base URL\n\n\`https://api.example.com/v1\`\n\n## Authentication\n\nBearer token in \`Authorization\` header.\n\n## Endpoints\n\n### GET /resource\n\n**Description:** List all resources.\n\n**Query Parameters:**\n\n| Param | Type | Required | Description |\n|-------|------|----------|-------------|\n| page | int | no | Page number |\n| limit | int | no | Items per page |\n\n**Response 200:**\n\n\`\`\`json\n{\n  "data": [],\n  "pagination": {\n    "page": 1,\n    "total": 0\n  }\n}\n\`\`\`\n\n### POST /resource\n\n**Description:** Create a new resource.\n\n**Request Body:**\n\n\`\`\`json\n{\n  "name": "string",\n  "description": "string"\n}\n\`\`\`\n\n**Response 201:**\n\n\`\`\`json\n{\n  "id": "string",\n  "name": "string",\n  "created_at": "string"\n}\n\`\`\`\n\n## Error Codes\n\n| Code | Description |\n|------|-------------|\n| 400 | Bad request |\n| 401 | Unauthorized |\n| 404 | Not found |\n| 500 | Internal error |\n`,
     icon: 'api',
     suggestedName: 'api-',
@@ -69,16 +98,69 @@ export const templates: Template[] = [
     label: 'Runbook',
     description: 'Operational playbook with steps, rollback, and post-incident',
     fileType: 'md',
+    category: 'documents',
     content: `---\ntags: [ops, runbook]\nstatus: approved\n---\n\n# Runbook: [Incident Type]\n\n## Trigger\n\nWhen does this runbook apply?\n\n## Impact\n\n**Severity:** High / Medium / Low  \n**Affected Systems:** \n\n## Steps\n\n1. **Verify** — Confirm the issue\n2. **Mitigate** — Immediate actions\n3. **Resolve** — Root cause fix\n4. **Communicate** — Notify stakeholders\n\n## Rollback\n\nSteps to undo changes if resolution fails.\n\n## Post-Incident\n\n- [ ] Write post-mortem\n- [ ] Update monitoring\n- [ ] Review this runbook\n`,
     icon: 'ops',
     suggestedName: 'runbook-',
   },
-  // Mermaid templates
+  {
+    id: 'md-bug-report',
+    label: 'Bug Report',
+    description: 'Structured bug report with repro steps and environment info',
+    fileType: 'md',
+    category: 'documents',
+    content: `---\ntags: [bug, triage]\nstatus: draft\n---\n\n# Bug: [Short Description]\n\n## Summary\n\nOne-line description of the issue.\n\n## Environment\n\n- **OS:** \n- **Browser / Runtime:** \n- **Version:** \n\n## Steps to Reproduce\n\n1. \n2. \n3. \n\n## Expected Behavior\n\nWhat should happen.\n\n## Actual Behavior\n\nWhat happens instead.\n\n## Screenshots / Logs\n\n\n\n## Severity\n\n- [ ] Critical (data loss, crash)\n- [ ] High (feature broken, no workaround)\n- [ ] Medium (feature broken, workaround exists)\n- [ ] Low (cosmetic, minor)\n\n## Notes\n\n`,
+    icon: 'bug',
+    suggestedName: 'bug-',
+  },
+  {
+    id: 'md-retro',
+    label: 'Sprint Retrospective',
+    description: 'What went well, what to improve, and action items',
+    fileType: 'md',
+    category: 'documents',
+    content: `# Retrospective: Sprint [N]\n\n**Date:** YYYY-MM-DD  \n**Participants:** \n\n## What Went Well\n\n- \n\n## What Could Be Improved\n\n- \n\n## Action Items\n\n| Action | Owner | Due |\n|--------|-------|-----|\n| | | |\n\n## Metrics\n\n- **Velocity:** \n- **Completed:** \n- **Carried Over:** \n`,
+    icon: 'refresh',
+    suggestedName: 'retro-',
+  },
+  {
+    id: 'md-rfc',
+    label: 'Technical RFC',
+    description: 'Request for comments on a technical proposal',
+    fileType: 'md',
+    category: 'documents',
+    content: `---\ntags: [rfc, draft]\nstatus: draft\n---\n\n# RFC: [Title]\n\n## Meta\n\n- **Author:** \n- **Created:** YYYY-MM-DD\n- **Status:** Draft | In Review | Accepted | Rejected\n\n## Summary\n\nOne-paragraph overview of the proposal.\n\n## Motivation\n\nWhy is this change needed? What problem does it solve?\n\n## Detailed Design\n\nDescribe the proposal in enough detail for implementation.\n\n## Alternatives Considered\n\n### Option A\n\nDescription, pros, and cons.\n\n### Option B\n\nDescription, pros, and cons.\n\n## Migration / Rollout Plan\n\nHow will this be deployed? What's the migration path?\n\n## Risks\n\n- \n\n## Open Questions\n\n- [ ] \n\n## References\n\n- \n`,
+    icon: 'scroll',
+    suggestedName: 'rfc-',
+  },
+  {
+    id: 'md-release-notes',
+    label: 'Release Notes',
+    description: 'Changelog format with features, fixes, and breaking changes',
+    fileType: 'md',
+    category: 'documents',
+    content: `# Release: v[X.Y.Z]\n\n**Date:** YYYY-MM-DD\n\n## Highlights\n\nBrief summary of this release.\n\n## New Features\n\n- \n\n## Bug Fixes\n\n- \n\n## Breaking Changes\n\n- \n\n## Deprecations\n\n- \n\n## Upgrade Guide\n\nSteps to upgrade from the previous version.\n\n## Contributors\n\n- \n`,
+    icon: 'rocket',
+    suggestedName: 'release-',
+  },
+  {
+    id: 'md-data-model',
+    label: 'Data Model',
+    description: 'Document entities, relationships, and constraints',
+    fileType: 'md',
+    category: 'documents',
+    content: `---\ntags: [data-model, draft]\nstatus: draft\n---\n\n# Data Model: [Domain]\n\n## Overview\n\nHigh-level description of the data domain.\n\n## Entities\n\n### Entity A\n\n| Field | Type | Constraints | Description |\n|-------|------|-------------|-------------|\n| id | UUID | PK | |\n| name | string | NOT NULL | |\n| created_at | timestamp | NOT NULL | |\n\n### Entity B\n\n| Field | Type | Constraints | Description |\n|-------|------|-------------|-------------|\n| id | UUID | PK | |\n| entity_a_id | UUID | FK → Entity A | |\n\n## Relationships\n\n- Entity A has many Entity B\n- Entity B belongs to Entity A\n\n## Indexes\n\n| Table | Columns | Type | Rationale |\n|-------|---------|------|----------|\n| | | | |\n\n## Constraints & Invariants\n\n- \n\n## Migration Notes\n\n- \n`,
+    icon: 'table',
+    suggestedName: 'data-model-',
+  },
+
+  // --- Diagrams ---
   {
     id: 'mermaid-flowchart',
     label: 'Flowchart',
     description: 'Top-down process flow with decisions and actions',
     fileType: 'mermaid',
+    category: 'diagrams',
     content: `graph TD\n    A[Start] --> B{Decision}\n    B -->|Yes| C[Action 1]\n    B -->|No| D[Action 2]\n    C --> E[End]\n    D --> E\n`,
     icon: 'flow',
     suggestedName: 'flowchart-',
@@ -88,6 +170,7 @@ export const templates: Template[] = [
     label: 'Sequence Diagram',
     description: 'Request/response interaction between services',
     fileType: 'mermaid',
+    category: 'diagrams',
     content: `sequenceDiagram\n    participant Client\n    participant Server\n    participant Database\n\n    Client->>Server: Request\n    Server->>Database: Query\n    Database-->>Server: Result\n    Server-->>Client: Response\n`,
     icon: 'sequence',
     suggestedName: 'sequence-',
@@ -97,6 +180,7 @@ export const templates: Template[] = [
     label: 'Class Diagram',
     description: 'Object-oriented class structure with inheritance',
     fileType: 'mermaid',
+    category: 'diagrams',
     content: `classDiagram\n    class Animal {\n        +String name\n        +int age\n        +makeSound()\n    }\n    class Dog {\n        +fetch()\n    }\n    class Cat {\n        +purr()\n    }\n    Animal <|-- Dog\n    Animal <|-- Cat\n`,
     icon: 'class',
     suggestedName: 'class-diagram-',
@@ -106,6 +190,7 @@ export const templates: Template[] = [
     label: 'ER Diagram',
     description: 'Entity-relationship database schema',
     fileType: 'mermaid',
+    category: 'diagrams',
     content: `erDiagram\n    USER ||--o{ POST : creates\n    USER {\n        int id PK\n        string name\n        string email\n    }\n    POST {\n        int id PK\n        string title\n        string content\n        int author_id FK\n    }\n`,
     icon: 'database',
     suggestedName: 'er-diagram-',
@@ -115,27 +200,49 @@ export const templates: Template[] = [
     label: 'State Diagram',
     description: 'State machine with transitions and conditions',
     fileType: 'mermaid',
+    category: 'diagrams',
     content: `stateDiagram-v2\n    [*] --> Idle\n    Idle --> Processing : submit\n    Processing --> Success : done\n    Processing --> Error : fail\n    Error --> Idle : retry\n    Success --> [*]\n`,
     icon: 'state',
     suggestedName: 'state-diagram-',
   },
-  // Excalidraw
+  {
+    id: 'mermaid-gantt',
+    label: 'Gantt Chart',
+    description: 'Project timeline with tasks, milestones, and dependencies',
+    fileType: 'mermaid',
+    category: 'diagrams',
+    content: `gantt\n    title Project Schedule\n    dateFormat YYYY-MM-DD\n    section Planning\n        Requirements     :a1, 2024-01-01, 7d\n        Design           :a2, after a1, 5d\n    section Development\n        Implementation   :b1, after a2, 14d\n        Testing          :b2, after b1, 7d\n    section Release\n        Deployment       :milestone, after b2, 0d\n`,
+    icon: 'gantt',
+    suggestedName: 'gantt-',
+  },
+  {
+    id: 'mermaid-pie',
+    label: 'Pie Chart',
+    description: 'Proportional data visualization',
+    fileType: 'mermaid',
+    category: 'diagrams',
+    content: `pie title Distribution\n    "Category A" : 40\n    "Category B" : 30\n    "Category C" : 20\n    "Category D" : 10\n`,
+    icon: 'pie',
+    suggestedName: 'pie-chart-',
+  },
   {
     id: 'excalidraw-blank',
     label: 'Blank Canvas',
     description: 'Freeform drawing canvas for diagrams and sketches',
     fileType: 'excalidraw',
+    category: 'diagrams',
     content: '',
     icon: 'canvas',
     suggestedName: 'drawing-',
   },
 
-  // JSON templates
+  // --- Data ---
   {
     id: 'json-blank',
     label: 'JSON Document',
     description: 'Empty JSON file with graph visualization',
     fileType: 'json',
+    category: 'data',
     content: '{\n  \n}',
     icon: 'json',
     suggestedName: 'data-',
@@ -145,6 +252,7 @@ export const templates: Template[] = [
     label: 'API Response',
     description: 'Sample API response structure for visualization',
     fileType: 'json',
+    category: 'data',
     content:
       '{\n  "status": "success",\n  "data": {\n    "users": [\n      {\n        "id": 1,\n        "name": "Example User",\n        "email": "user@example.com",\n        "roles": ["admin", "editor"]\n      }\n    ],\n    "pagination": {\n      "page": 1,\n      "perPage": 20,\n      "total": 1\n    }\n  }\n}',
     icon: 'json',

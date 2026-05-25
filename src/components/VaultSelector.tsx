@@ -112,6 +112,13 @@ export function VaultSelector() {
             <span className="w-1.5 h-1.5 rounded-full bg-success opacity-60" />
             .mermaid
           </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full opacity-60"
+              style={{ backgroundColor: '#a78bfa' }}
+            />
+            .json
+          </span>
         </div>
 
         <p className="text-muted text-xs mt-4">Plain files on disk. Git-friendly.</p>

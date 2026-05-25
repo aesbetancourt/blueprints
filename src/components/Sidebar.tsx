@@ -18,6 +18,7 @@ import { FileExplorer } from './FileExplorer';
 import { CreateFileButton } from './CreateFile';
 import { TableOfContents } from './TableOfContents';
 import { BacklinksPanel } from './BacklinksPanel';
+import { OutgoingLinksPanel } from './OutgoingLinksPanel';
 import { TagsPanel } from './TagsPanel';
 import { AnnotationsPanel } from './AnnotationsPanel';
 import { InboxSection } from './InboxSection';
@@ -223,14 +224,17 @@ export function Sidebar() {
         {/* Tags */}
         <TagsPanel />
 
+        {/* Outgoing Links */}
+        <OutgoingLinksPanel />
+
+        {/* Backlinks */}
+        <BacklinksPanel />
+
         {/* Notes/Annotations (only for md files) */}
         <AnnotationsPanel />
 
         {/* Outline (only for md files) */}
         <TableOfContents />
-
-        {/* Backlinks (only for md files) */}
-        <BacklinksPanel />
       </div>
     </aside>
   );

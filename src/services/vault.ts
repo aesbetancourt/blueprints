@@ -98,10 +98,28 @@ export const VaultService = {
   async scanTags(): Promise<FileTagInfo[]> {
     return invoke<FileTagInfo[]>('scan_tags');
   },
+
+  async getFileTags(path: string): Promise<string[]> {
+    return invoke<string[]>('get_file_tags', { path });
+  },
+
+  async setTags(path: string, tags: string[]): Promise<void> {
+    return invoke('set_tags', { path, tags });
+  },
+
+  async scanBacklinks(targetName: string): Promise<BacklinkEntry[]> {
+    return invoke<BacklinkEntry[]>('scan_backlinks', { targetName });
+  },
 };
 
 export interface FileTagInfo {
   path: string;
   tags: string[];
   status: string | null;
+}
+
+export interface BacklinkEntry {
+  path: string;
+  line_number: number;
+  line_content: string;
 }

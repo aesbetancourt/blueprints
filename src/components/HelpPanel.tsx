@@ -22,7 +22,7 @@ const SECTIONS: { id: Section; label: string }[] = [
   { id: 'editor', label: 'Editor' },
   { id: 'shortcuts', label: 'Keyboard Shortcuts' },
   { id: 'search', label: 'Search' },
-  { id: 'tags', label: 'Tags & Organization' },
+  { id: 'tags', label: 'Tags, Links & Markers' },
   { id: 'templates', label: 'Templates' },
   { id: 'settings', label: 'Settings' },
 ];
@@ -269,11 +269,19 @@ function HelpContent({ section }: { section: Section }) {
               label="Mermaid"
               description="Open .mermaid files for diagram editing with live preview."
             />
+            <HelpItem
+              label="JSON"
+              description="Open .json files for split-view editing with CodeMirror and an interactive graph visualization."
+            />
           </HelpGroup>
           <HelpGroup title="Saving">
             <HelpItem
               label="Auto-save"
               description="Files save automatically when you switch tabs, switch windows, or the app loses focus."
+            />
+            <HelpItem
+              label="Manual save"
+              description="Press ⌘S to save the current file immediately."
             />
           </HelpGroup>
         </>
@@ -297,6 +305,7 @@ function HelpContent({ section }: { section: Section }) {
             <ShortcutRow keys="⌘F" desc="Find in current file" />
           </HelpGroup>
           <HelpGroup title="Editor (Rich Mode)">
+            <ShortcutRow keys="⌘S" desc="Save file" />
             <ShortcutRow keys="⌘B" desc="Bold" />
             <ShortcutRow keys="⌘I" desc="Italic" />
             <ShortcutRow keys="⌘E" desc="Inline code" />
@@ -351,29 +360,51 @@ function HelpContent({ section }: { section: Section }) {
     case 'tags':
       return (
         <>
-          <p>Tag files for quick categorization and filtering.</p>
-          <HelpGroup title="Using Tags">
+          <p>Organize files with frontmatter tags and color markers.</p>
+          <HelpGroup title="Frontmatter Tags">
             <HelpItem
-              label="Assign tags"
-              description="Right-click a file, open the 'Tags' submenu, and check/uncheck tags."
+              label="How they work"
+              description="Tags are stored in the YAML frontmatter of markdown files as tags: [tag1, tag2]. They persist with the file."
             />
             <HelpItem
-              label="Predefined tags"
-              description="Important, WIP, Review, Done, and Blocked come built-in with distinct colors."
+              label="Add/remove tags"
+              description="Use the Tags panel in the right sidebar. Click + next to 'Current file' to add a tag, or click the × on a tag to remove it."
             />
             <HelpItem
-              label="Custom tags"
-              description="Create your own tags from the Tags submenu in the right-click context menu."
+              label="Vault-wide view"
+              description="The Tags panel shows all tags across the vault as chips with file counts. Click a tag to see which files use it."
+            />
+            <HelpItem
+              label="Autocomplete"
+              description="When adding a tag, existing vault tags are suggested as you type."
             />
           </HelpGroup>
-          <HelpGroup title="Visibility">
+          <HelpGroup title="Color Markers">
             <HelpItem
-              label="Tag badges"
-              description="Colored pill badges appear next to file names in the explorer."
+              label="Assign markers"
+              description="Right-click a file and open the 'Markers' submenu to assign a color label."
             />
             <HelpItem
-              label="Tags panel"
-              description="Use the Tags section in the sidebar to see all tags and filter by them."
+              label="Purpose"
+              description="Markers add colored dots next to files in the explorer for visual categorization."
+            />
+          </HelpGroup>
+          <HelpGroup title="Wiki Links & Backlinks">
+            <HelpItem
+              label="Create wiki links"
+              description="Type [[ in the editor to open file suggestions. Links are stored as [[filename]] in markdown."
+            />
+            <HelpItem
+              label="Navigate links"
+              description="Click any [[wiki link]] in the editor to jump to that file."
+            />
+            <HelpItem
+              label="Backlinks panel"
+              description="The right sidebar shows incoming links — other files that reference the current document."
+            />
+            <HelpItem
+              label="Outgoing links"
+              description="The Links panel lists all wiki links in the current file with line numbers."
             />
           </HelpGroup>
         </>

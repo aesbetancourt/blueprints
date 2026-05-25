@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Pencil, Network, File, X, PanelLeftOpen } from 'lucide-react';
+import { FileText, Pencil, Network, Braces, File, X, PanelLeftOpen } from 'lucide-react';
 import { useWorkspaceStore, type Tab } from '../store/workspace';
 import { confirm } from './ConfirmDialog';
 
@@ -11,6 +11,8 @@ function TabIcon({ fileType }: { fileType: string }) {
       return <Pencil size={12} className="shrink-0" style={{ color: 'var(--color-warning)' }} />;
     case 'mermaid':
       return <Network size={12} className="shrink-0" style={{ color: 'var(--color-success)' }} />;
+    case 'json':
+      return <Braces size={12} className="shrink-0" style={{ color: '#a78bfa' }} />;
     default:
       return <File size={12} className="shrink-0" style={{ color: 'var(--color-text-muted)' }} />;
   }

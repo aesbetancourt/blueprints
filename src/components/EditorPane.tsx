@@ -16,17 +16,35 @@ function computeStats(text: string, charsPerToken: number) {
   return { chars, words, tokens };
 }
 
+/** Extract YAML frontmatter from markdown content */
+function splitFrontmatter(content: string): { frontmatter: string; body: string } {
+  const trimmed = content.trimStart();
+  if (!trimmed.startsWith('---')) return { frontmatter: '', body: content };
+  const afterStart = trimmed.slice(3);
+  const endIdx = afterStart.indexOf('\n---');
+  if (endIdx === -1) return { frontmatter: '', body: content };
+  const leading = content.slice(0, content.length - trimmed.length);
+  const frontmatter = leading + '---' + afterStart.slice(0, endIdx) + '\n---';
+  const body = afterStart.slice(endIdx + 4); // everything after closing \n---
+  return { frontmatter, body };
+}
+
 export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' | 'raw' }) {
   const cached = VaultService.getCached(tab.filePath);
-  const [content, setContent] = useState<string | null>(cached ?? null);
+  // For markdown, split frontmatter from cached content
+  const cachedSplit = cached != null && tab.fileType === 'md' ? splitFrontmatter(cached) : null;
+  const initialContent = cachedSplit ? cachedSplit.body : (cached ?? null);
+
+  const [content, setContent] = useState<string | null>(initialContent);
   const [error, setError] = useState<string | null>(null);
   const [showLoading, setShowLoading] = useState(false);
   const [forceGraph, setForceGraph] = useState(false);
-  const contentRef = useRef<string | null>(cached ?? null);
+  const contentRef = useRef<string | null>(initialContent);
   const isDirtyRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const tabPathRef = useRef(tab.filePath);
   tabPathRef.current = tab.filePath;
+  const frontmatterRef = useRef<string>(cachedSplit?.frontmatter ?? '');
 
   const markDirty = useWorkspaceStore(
     (s: { markDirty: (id: string, dirty: boolean) => void }) => s.markDirty,
@@ -59,10 +77,16 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
         if (cancelled) return;
         clearTimeout(loadingTimer);
         setShowLoading(false);
-        setContent(c);
-        contentRef.current = c;
+        // For markdown files, separate frontmatter from body
         if (tab.fileType === 'md') {
+          const { frontmatter, body } = splitFrontmatter(c);
+          frontmatterRef.current = frontmatter;
+          setContent(body);
+          contentRef.current = body;
           setDocumentStats(computeStats(c, charsPerToken));
+        } else {
+          setContent(c);
+          contentRef.current = c;
         }
       })
       .catch((err: unknown) => {
@@ -115,13 +139,18 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
   const saveToFile = useCallback(async () => {
     if (contentRef.current === null || !isDirtyRef.current) return;
     try {
-      await VaultService.writeFile(tab.filePath, contentRef.current);
+      // Re-prepend frontmatter for markdown files
+      const toSave =
+        tab.fileType === 'md' && frontmatterRef.current
+          ? frontmatterRef.current + contentRef.current
+          : contentRef.current;
+      await VaultService.writeFile(tab.filePath, toSave);
       isDirtyRef.current = false;
       markDirty(tab.id, false);
     } catch (err: unknown) {
       addToast(`Save failed: ${err}`, 'error');
     }
-  }, [tab.filePath, tab.id, markDirty, addToast]);
+  }, [tab.filePath, tab.fileType, tab.id, markDirty, addToast]);
 
   // Ctrl/Cmd+S to save
   useEffect(() => {
@@ -141,7 +170,11 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
 
     const trySave = () => {
       if (isDirtyRef.current && contentRef.current !== null) {
-        VaultService.writeFile(tabPathRef.current, contentRef.current)
+        const toSave =
+          tab.fileType === 'md' && frontmatterRef.current
+            ? frontmatterRef.current + contentRef.current
+            : contentRef.current;
+        VaultService.writeFile(tabPathRef.current, toSave)
           .then(() => {
             isDirtyRef.current = false;
             markDirty(tab.id, false);
@@ -164,7 +197,21 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
       container?.removeEventListener('focusout', handleFocusOut);
       window.removeEventListener('blur', handleWindowBlur);
     };
-  }, [tab.id, markDirty]);
+  }, [tab.id, tab.fileType, markDirty]);
+
+  // Listen for external file updates (e.g. tag changes from sidebar)
+  useEffect(() => {
+    if (tab.fileType !== 'md') return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { path: string; content: string };
+      if (detail.path !== tab.filePath) return;
+      // Only update frontmatter — the editor body doesn't need to change for tag edits
+      const { frontmatter } = splitFrontmatter(detail.content);
+      frontmatterRef.current = frontmatter;
+    };
+    window.addEventListener('vault:file-updated', handler);
+    return () => window.removeEventListener('vault:file-updated', handler);
+  }, [tab.filePath, tab.fileType]);
 
   // Save on unmount (tab switch/close)
   const tabIdRef = useRef(tab.id);
@@ -177,7 +224,11 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
         const tabStillExists = tabs.some((t) => t.id === tabIdRef.current);
         if (!tabStillExists) return;
 
-        VaultService.writeFile(tabPathRef.current, contentRef.current).catch(() => {});
+        const toSave =
+          tab.fileType === 'md' && frontmatterRef.current
+            ? frontmatterRef.current + contentRef.current
+            : contentRef.current;
+        VaultService.writeFile(tabPathRef.current, toSave).catch(() => {});
         // Clear dirty state directly on the store since component is unmounting
         useWorkspaceStore.getState().markDirty(tabIdRef.current, false);
       }

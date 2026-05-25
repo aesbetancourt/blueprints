@@ -481,3 +481,214 @@ pub fn scan_tags(
     walk_for_md(&root, &mut results, &vault_path);
     Ok(results)
 }
+
+/// Set tags on a markdown file's frontmatter (replaces existing tags)
+#[command]
+pub async fn set_tags(path: String, tags: Vec<String>, state: tauri::State<'_, crate::AppState>) -> Result<(), String> {
+    let vault_root = get_vault_root(&state)?;
+    validate_path(&path, &vault_root)?;
+
+    let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    let updated = write_tags_to_frontmatter(&content, &tags);
+    fs::write(&path, updated).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+fn write_tags_to_frontmatter(content: &str, tags: &[String]) -> String {
+    let tags_line = if tags.is_empty() {
+        String::new()
+    } else {
+        format!("tags: [{}]", tags.join(", "))
+    };
+
+    let trimmed = content.trim_start();
+    if !trimmed.starts_with("---") {
+        // No frontmatter — prepend one
+        if tags.is_empty() {
+            return content.to_string();
+        }
+        return format!("---\n{}\n---\n\n{}", tags_line, content);
+    }
+
+    let after_start = &trimmed[3..];
+    let Some(end) = after_start.find("\n---") else {
+        // Malformed frontmatter — prepend fresh
+        if tags.is_empty() {
+            return content.to_string();
+        }
+        return format!("---\n{}\n---\n\n{}", tags_line, content);
+    };
+
+    let frontmatter = &after_start[..end];
+    let after_frontmatter = &after_start[end + 4..]; // skip \n---
+
+    // Remove existing tags lines (handle both inline and list format)
+    let mut new_lines: Vec<&str> = Vec::new();
+    let mut in_tags_list = false;
+    for line in frontmatter.lines() {
+        let stripped = line.trim();
+        if stripped.starts_with("tags:") {
+            in_tags_list = true;
+            continue;
+        }
+        if in_tags_list {
+            if stripped.starts_with("- ") {
+                continue; // skip tag list items
+            }
+            in_tags_list = false;
+        }
+        new_lines.push(line);
+    }
+
+    // Add new tags line if non-empty
+    let mut fm_content = new_lines.join("\n");
+    if !tags.is_empty() {
+        if fm_content.is_empty() || fm_content.ends_with('\n') {
+            fm_content.push_str(&tags_line);
+        } else {
+            fm_content.push('\n');
+            fm_content.push_str(&tags_line);
+        }
+    }
+
+    // Reconstruct: leading whitespace + --- + frontmatter + --- + rest
+    let leading_ws = &content[..content.len() - trimmed.len()];
+    format!("{}---\n{}\n---{}", leading_ws, fm_content, after_frontmatter)
+}
+
+/// Get tags for a specific file
+#[command]
+pub async fn get_file_tags(path: String, state: tauri::State<'_, crate::AppState>) -> Result<Vec<String>, String> {
+    let vault_root = get_vault_root(&state)?;
+    validate_path(&path, &vault_root)?;
+
+    let content = fs::read_to_string(&path).map_err(|e| e.to_string())?;
+    Ok(extract_tags(&content))
+}
+
+fn extract_tags(content: &str) -> Vec<String> {
+    let trimmed = content.trim_start();
+    if !trimmed.starts_with("---") {
+        return Vec::new();
+    }
+    let after_start = &trimmed[3..];
+    let Some(end) = after_start.find("\n---") else {
+        return Vec::new();
+    };
+    let frontmatter = &after_start[..end];
+
+    let mut tags: Vec<String> = Vec::new();
+    let mut in_tags = false;
+    for line in frontmatter.lines() {
+        let stripped = line.trim();
+        if stripped.starts_with("tags:") {
+            in_tags = true;
+            let value = stripped.strip_prefix("tags:").unwrap_or("").trim();
+            if value.starts_with('[') && value.ends_with(']') {
+                let inner = &value[1..value.len() - 1];
+                for tag in inner.split(',') {
+                    let t = tag.trim().trim_matches(|c| c == '"' || c == '\'');
+                    if !t.is_empty() {
+                        tags.push(t.to_string());
+                    }
+                }
+            } else if !value.is_empty() {
+                tags.push(value.to_string());
+            }
+        } else if in_tags && stripped.starts_with("- ") {
+            let t = stripped.strip_prefix("- ").unwrap_or("").trim().trim_matches(|c| c == '"' || c == '\'');
+            if !t.is_empty() {
+                tags.push(t.to_string());
+            }
+        } else {
+            in_tags = false;
+        }
+    }
+    tags
+}
+
+#[derive(Serialize)]
+pub struct BacklinkEntry {
+    pub path: String,
+    pub line_number: usize,
+    pub line_content: String,
+}
+
+/// Scan vault for all files that contain [[target_name]] wiki-links pointing to the given file
+#[command]
+pub fn scan_backlinks(
+    target_name: String,
+    state: tauri::State<crate::AppState>,
+) -> Result<Vec<BacklinkEntry>, String> {
+    let vault_path = state
+        .vault_path
+        .lock()
+        .map_err(|e| e.to_string())?
+        .clone()
+        .ok_or("No vault open")?;
+
+    let root = PathBuf::from(&vault_path);
+    let mut results: Vec<BacklinkEntry> = Vec::new();
+
+    // Normalize target: strip extension for matching
+    let target_lower = target_name
+        .trim_end_matches(".md")
+        .trim_end_matches(".excalidraw")
+        .trim_end_matches(".mermaid")
+        .trim_end_matches(".json")
+        .to_lowercase();
+
+    fn walk_for_links(dir: &PathBuf, results: &mut Vec<BacklinkEntry>, vault_root: &str, target: &str) {
+        let Ok(entries) = fs::read_dir(dir) else { return };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let name = entry.file_name().to_string_lossy().to_string();
+            if name.starts_with('.') || name == "node_modules" {
+                continue;
+            }
+            if path.is_dir() {
+                walk_for_links(&path, results, vault_root, target);
+            } else if name.ends_with(".md") {
+                if let Ok(content) = fs::read_to_string(&path) {
+                    for (line_num, line) in content.lines().enumerate() {
+                        // Find all [[...]] patterns in this line
+                        let mut search_from = 0;
+                        while let Some(start) = line[search_from..].find("[[") {
+                            let abs_start = search_from + start + 2;
+                            if let Some(end) = line[abs_start..].find("]]") {
+                                let link_text = &line[abs_start..abs_start + end];
+                                let link_lower = link_text.to_lowercase();
+                                // Match by filename (strip extension if present)
+                                let link_stem = link_lower
+                                    .trim_end_matches(".md")
+                                    .trim_end_matches(".excalidraw")
+                                    .trim_end_matches(".mermaid")
+                                    .trim_end_matches(".json");
+                                if link_stem == target {
+                                    let rel_path = path
+                                        .to_string_lossy()
+                                        .strip_prefix(vault_root)
+                                        .unwrap_or(&path.to_string_lossy())
+                                        .trim_start_matches('/')
+                                        .to_string();
+                                    results.push(BacklinkEntry {
+                                        path: rel_path,
+                                        line_number: line_num + 1,
+                                        line_content: line.trim().to_string(),
+                                    });
+                                    break; // Only report once per line
+                                }
+                                search_from = abs_start + end + 2;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    walk_for_links(&root, &mut results, &vault_path, &target_lower);
+    Ok(results)
+}

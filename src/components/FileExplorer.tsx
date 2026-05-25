@@ -506,12 +506,12 @@ export function FileExplorer({
             }}
           />
           <FileContextMenuDivider />
-          {/* Tag submenu */}
+          {/* Marker submenu */}
           <button
             onClick={() => setTagMenuOpen(!tagMenuOpen)}
             className="w-full px-3 py-1.5 text-left text-xs text-secondary hover:text-primary hover:bg-surface-2 flex items-center justify-between"
           >
-            <span>Tags</span>
+            <span>Markers</span>
             <ChevronDown
               size={8}
               className={`transition-transform ${tagMenuOpen ? 'rotate-180' : ''}`}
@@ -546,7 +546,7 @@ export function FileExplorer({
                   </button>
                 );
               })}
-              {/* Create custom tag */}
+              {/* Create custom marker */}
               <div className="mt-1 pt-1 border-t border-default">
                 <div className="flex items-center gap-1">
                   <input
@@ -571,7 +571,7 @@ export function FileExplorer({
                         setNewTagName('');
                       }
                     }}
-                    placeholder="New tag..."
+                    placeholder="New marker..."
                     className="flex-1 min-w-0 bg-surface-1 border border-default rounded px-1.5 py-0.5 text-xs text-primary outline-none focus:border-accent"
                   />
                   <button
@@ -1260,6 +1260,10 @@ function FileIcon({ ext }: { ext: string | undefined }) {
           className="w-2 h-2 rounded-full shrink-0"
           style={{ backgroundColor: 'var(--color-success)' }}
         />
+      );
+    case 'json':
+      return (
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#a78bfa' }} />
       );
     default:
       return (

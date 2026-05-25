@@ -27,6 +27,31 @@ import { TableControls } from './TableControls';
 import { FindBar } from './FindBar';
 import './markdown-editor.css';
 
+import type { FileEntry } from '../store/workspace';
+
+/** Resolve a wiki-link name to a full file path by searching the file tree */
+function resolveWikiLink(name: string, fileTree: FileEntry[]): string | null {
+  const lower = name.toLowerCase();
+  // Try with and without extensions
+  function walk(entries: FileEntry[]): string | null {
+    for (const entry of entries) {
+      if (entry.isDirectory) {
+        if (entry.children) {
+          const found = walk(entry.children);
+          if (found) return found;
+        }
+      } else {
+        const stem = entry.name.replace(/\.[^.]+$/, '').toLowerCase();
+        if (stem === lower || entry.name.toLowerCase() === lower) {
+          return entry.path;
+        }
+      }
+    }
+    return null;
+  }
+  return walk(fileTree);
+}
+
 type EditorMode = 'rich' | 'raw';
 
 interface MarkdownEditorProps {
@@ -130,8 +155,17 @@ export function MarkdownEditor({
     const target = e.target as HTMLElement;
     const wikiEl = target.closest('[data-wiki-link]') as HTMLElement | null;
     if (wikiEl) {
-      const href = wikiEl.getAttribute('href') || wikiEl.dataset.href;
-      if (href) openFile(href);
+      const href = wikiEl.dataset.href || wikiEl.getAttribute('href');
+      if (!href) return;
+      // If it's a full path, open directly; otherwise resolve by filename
+      if (href.startsWith('/')) {
+        openFile(href);
+      } else {
+        // Resolve by filename: find first file in vault matching the name
+        const fileTree = useWorkspaceStore.getState().fileTree;
+        const resolved = resolveWikiLink(href, fileTree);
+        if (resolved) openFile(resolved);
+      }
       return;
     }
     // Open external links in system browser
