@@ -146,6 +146,13 @@ pub async fn create_file(path: String, file_type: String, state: tauri::State<'_
 }
 
 #[command]
+pub async fn file_exists(path: String, state: tauri::State<'_, crate::AppState>) -> Result<bool, String> {
+    let vault_root = get_vault_root(&state)?;
+    validate_path(&path, &vault_root)?;
+    Ok(PathBuf::from(&path).exists())
+}
+
+#[command]
 pub async fn delete_file(path: String, state: tauri::State<'_, crate::AppState>) -> Result<(), String> {
     let vault_root = get_vault_root(&state)?;
     validate_path(&path, &vault_root)?;

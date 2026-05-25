@@ -164,6 +164,11 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
     const fullPath = `${dir}/${name}`;
 
     try {
+      const exists = await VaultService.fileExists(fullPath);
+      if (exists) {
+        addToast(`A file named "${name}" already exists in this folder`, 'error');
+        return;
+      }
       const createdPath = await VaultService.createFile(fullPath, selectedTemplate.fileType);
       if (selectedTemplate.content) {
         await VaultService.writeFile(createdPath, selectedTemplate.content);

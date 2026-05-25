@@ -43,6 +43,7 @@ pub fn run() {
             commands::files::read_file,
             commands::files::write_file,
             commands::files::create_file,
+            commands::files::file_exists,
             commands::files::create_dir,
             commands::files::archive_file,
             commands::files::move_file,

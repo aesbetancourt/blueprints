@@ -58,6 +58,10 @@ export const VaultService = {
     return created;
   },
 
+  async fileExists(path: string): Promise<boolean> {
+    return invoke<boolean>('file_exists', { path });
+  },
+
   async createDir(path: string): Promise<string> {
     return invoke<string>('create_dir', { path });
   },

@@ -84,7 +84,13 @@ function NewFileMenu({ targetDir, onClose, position }: NewFileMenuProps) {
     const name = fileName.endsWith(ext) ? fileName : `${fileName}${ext}`;
     const fullPath = `${dir}/${name}`;
     const templateContent = selectedTemplate?.content ?? '';
+
     try {
+      const exists = await VaultService.fileExists(fullPath);
+      if (exists) {
+        addToast(`A file named "${name}" already exists in this folder`, 'error');
+        return;
+      }
       const createdPath = await VaultService.createFile(fullPath, selectedType);
       // If we have template content, write it
       if (templateContent) {
