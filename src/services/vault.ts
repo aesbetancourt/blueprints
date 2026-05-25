@@ -1,0 +1,95 @@
+import { invoke } from '@tauri-apps/api/core';
+
+export interface FileEntry {
+  name: string;
+  path: string;
+  is_directory: boolean;
+  children?: FileEntry[];
+}
+
+export interface VaultMeta {
+  path: string;
+  file_count: number;
+}
+
+export interface SearchResult {
+  path: string;
+  name: string;
+  line_number: number;
+  line_content: string;
+}
+
+export const VaultService = {
+  /** In-memory cache for file contents — enables synchronous initial render */
+  _cache: new Map<string, string>(),
+
+  async openVault(path: string): Promise<VaultMeta> {
+    return invoke<VaultMeta>('open_vault', { path });
+  },
+
+  async listFiles(path: string): Promise<FileEntry[]> {
+    return invoke<FileEntry[]>('list_files', { path });
+  },
+
+  async readFile(path: string): Promise<string> {
+    const content = await invoke<string>('read_file', { path });
+    this._cache.set(path, content);
+    return content;
+  },
+
+  /** Get cached content synchronously (returns undefined if not cached) */
+  getCached(path: string): string | undefined {
+    return this._cache.get(path);
+  },
+
+  /** Invalidate cache entry (e.g. after external change) */
+  invalidateCache(path: string): void {
+    this._cache.delete(path);
+  },
+
+  async writeFile(path: string, content: string): Promise<void> {
+    return invoke('write_file', { path, content });
+  },
+
+  async createFile(path: string, fileType: string): Promise<string> {
+    return invoke<string>('create_file', { path, fileType });
+  },
+
+  async createDir(path: string): Promise<string> {
+    return invoke<string>('create_dir', { path });
+  },
+
+  async archiveFile(path: string): Promise<string> {
+    return invoke<string>('archive_file', { path });
+  },
+
+  async moveFile(source: string, destFolder: string): Promise<string> {
+    return invoke<string>('move_file', { source, destFolder });
+  },
+
+  async countFilesInDir(path: string): Promise<number> {
+    return invoke<number>('count_files_in_dir', { path });
+  },
+
+  async deleteFile(path: string): Promise<void> {
+    return invoke('delete_file', { path });
+  },
+
+  async renameFile(oldPath: string, newPath: string): Promise<void> {
+    return invoke('rename_file', { oldPath, newPath });
+  },
+
+  async searchFiles(query: string): Promise<SearchResult[]> {
+    return invoke<SearchResult[]>('search_files', { query });
+  },
+
+  async scanTags(): Promise<FileTagInfo[]> {
+    return invoke<FileTagInfo[]>('scan_tags');
+  },
+};
+
+export interface FileTagInfo {
+  path: string;
+  tags: string[];
+  status: string | null;
+}

@@ -1,8 +1,36 @@
+# Dependencies
 node_modules/
+
+# Build output (Vite frontend)
 dist/
+
+# Tauri build artifacts (Rust compiled binaries, intermediate files)
+src-tauri/target/
+
+# Environment variables
 .env
 .env.local
+.env.*.local
+
+# Test coverage
 coverage/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Turborepo / Next.js (if ever used)
 .turbo/
 .next/
-*.tsbuildinfo
+
+# Generated Tauri files
+__global-api-script.js
+
+# Logs
+*.log

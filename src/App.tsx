@@ -1,7 +1,5 @@
+import { Shell } from './components/Shell';
+
 export default function App() {
-  return (
-    <main>
-      <h1>blueprints</h1>
-    </main>
-  );
+  return <Shell />;
 }
