@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ChevronRight, Pencil, X, Plus } from 'lucide-react';
 import { useAnnotationsStore, type Annotation } from '../store/annotations';
 import { useWorkspaceStore } from '../store/workspace';
 
@@ -51,17 +52,10 @@ export function AnnotationsPanel() {
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-muted uppercase tracking-wider hover:text-secondary transition-colors"
       >
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
+        <ChevronRight
+          size={10}
           className={`transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}
-        >
-          <path d="M3 1.5l4 3.5-4 3.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        />
         Notes
         {fileAnnotations.length > 0 && (
           <span className="ml-auto px-1.5 py-0.5 rounded bg-surface-2 text-muted font-mono text-xs">
@@ -120,38 +114,14 @@ export function AnnotationsPanel() {
                         className="p-0.5 rounded text-muted hover:text-primary"
                         title="Edit"
                       >
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
+                        <Pencil size={10} />
                       </button>
                       <button
                         onClick={() => deleteAnnotation(ann.id)}
                         className="p-0.5 rounded text-muted hover:text-danger"
                         title="Delete"
                       >
-                        <svg
-                          width="10"
-                          height="10"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
+                        <X size={10} />
                       </button>
                     </div>
                   </>
@@ -213,18 +183,7 @@ export function AnnotationsPanel() {
               onClick={() => setAdding(true)}
               className="mt-2 text-xs text-muted hover:text-accent transition-colors flex items-center gap-1"
             >
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <line x1="8" y1="3" x2="8" y2="13" />
-                <line x1="3" y1="8" x2="13" y2="8" />
-              </svg>
+              <Plus size={10} />
               Add note
             </button>
           )}

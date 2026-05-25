@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Editor } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
+import { Search, ChevronUp, ChevronDown, X } from 'lucide-react';
 
 interface FindBarProps {
   editor: Editor | null;
@@ -7,11 +10,75 @@ interface FindBarProps {
   onClose: () => void;
 }
 
+const findPluginKey = new PluginKey('find-highlight');
+
+function createFindPlugin() {
+  return new Plugin({
+    key: findPluginKey,
+    state: {
+      init() {
+        return {
+          decorations: DecorationSet.empty,
+          matches: [] as { from: number; to: number }[],
+          currentIndex: -1,
+        };
+      },
+      apply(tr, prev) {
+        const meta = tr.getMeta(findPluginKey);
+        if (meta) return meta;
+        // Map decorations through document changes
+        if (tr.docChanged) {
+          return { ...prev, decorations: prev.decorations.map(tr.mapping, tr.doc) };
+        }
+        return prev;
+      },
+    },
+    props: {
+      decorations(state) {
+        return findPluginKey.getState(state)?.decorations ?? DecorationSet.empty;
+      },
+    },
+  });
+}
+
+function updateHighlights(
+  editor: Editor,
+  matches: { from: number; to: number }[],
+  currentIndex: number,
+) {
+  const { tr } = editor.state;
+  const decorations: Decoration[] = matches.map((match, i) => {
+    const className = i === currentIndex ? 'find-highlight-current' : 'find-highlight';
+    return Decoration.inline(match.from, match.to, { class: className });
+  });
+  const decoSet = DecorationSet.create(editor.state.doc, decorations);
+  tr.setMeta(findPluginKey, { decorations: decoSet, matches, currentIndex });
+  editor.view.dispatch(tr);
+}
+
+function clearHighlights(editor: Editor) {
+  const { tr } = editor.state;
+  tr.setMeta(findPluginKey, { decorations: DecorationSet.empty, matches: [], currentIndex: -1 });
+  editor.view.dispatch(tr);
+}
+
 export function FindBar({ editor, open, onClose }: FindBarProps) {
   const [query, setQuery] = useState('');
   const [matches, setMatches] = useState<{ from: number; to: number }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pluginRegistered = useRef(false);
+
+  // Register the plugin on first open
+  useEffect(() => {
+    if (!editor || pluginRegistered.current) return;
+    // Check if plugin is already registered
+    const existing = editor.state.plugins.find((p) => p.spec.key === findPluginKey);
+    if (!existing) {
+      editor.registerPlugin(createFindPlugin());
+    }
+    pluginRegistered.current = true;
+  }, [editor]);
 
   // Focus input when opened
   useEffect(() => {
@@ -22,8 +89,8 @@ export function FindBar({ editor, open, onClose }: FindBarProps) {
       setQuery('');
       setMatches([]);
       setCurrentIndex(0);
-      // Clear any selection highlight when closing
       if (editor) {
+        clearHighlights(editor);
         editor.commands.setTextSelection(editor.state.selection.from);
       }
     }
@@ -34,6 +101,7 @@ export function FindBar({ editor, open, onClose }: FindBarProps) {
       if (!editor || !searchQuery) {
         setMatches([]);
         setCurrentIndex(0);
+        if (editor) clearHighlights(editor);
         return;
       }
 
@@ -59,19 +127,19 @@ export function FindBar({ editor, open, onClose }: FindBarProps) {
       setMatches(results);
       if (results.length > 0) {
         setCurrentIndex(0);
-        goToMatch(results[0]);
+        updateHighlights(editor, results, 0);
+        goToMatch(editor, results[0]);
       } else {
         setCurrentIndex(0);
+        clearHighlights(editor);
       }
     },
     [editor],
   );
 
-  const goToMatch = (match: { from: number; to: number }) => {
-    if (!editor) return;
-    editor.commands.setTextSelection({ from: match.from, to: match.to });
-    // Scroll into view
-    const { view } = editor;
+  const goToMatch = (ed: Editor, match: { from: number; to: number }) => {
+    ed.commands.setTextSelection({ from: match.from, to: match.to });
+    const { view } = ed;
     const dom = view.domAtPos(match.from);
     if (dom.node instanceof HTMLElement) {
       dom.node.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -81,17 +149,19 @@ export function FindBar({ editor, open, onClose }: FindBarProps) {
   };
 
   const goNext = () => {
-    if (matches.length === 0) return;
+    if (!editor || matches.length === 0) return;
     const next = (currentIndex + 1) % matches.length;
     setCurrentIndex(next);
-    goToMatch(matches[next]);
+    updateHighlights(editor, matches, next);
+    goToMatch(editor, matches[next]);
   };
 
   const goPrev = () => {
-    if (matches.length === 0) return;
+    if (!editor || matches.length === 0) return;
     const prev = (currentIndex - 1 + matches.length) % matches.length;
     setCurrentIndex(prev);
-    goToMatch(matches[prev]);
+    updateHighlights(editor, matches, prev);
+    goToMatch(editor, matches[prev]);
   };
 
   useEffect(() => {
@@ -114,18 +184,7 @@ export function FindBar({ editor, open, onClose }: FindBarProps) {
 
   return (
     <div className="absolute top-0 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-b-lg bg-surface-1 border border-t-0 border-default shadow-lg">
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="var(--color-text-muted)"
-        strokeWidth="1.5"
-        className="shrink-0"
-      >
-        <circle cx="7" cy="7" r="5" />
-        <path d="M11 11l3 3" strokeLinecap="round" />
-      </svg>
+      <Search size={12} className="shrink-0 text-muted" />
       <input
         ref={inputRef}
         value={query}
@@ -145,16 +204,7 @@ export function FindBar({ editor, open, onClose }: FindBarProps) {
         className="p-0.5 rounded hover:bg-surface-2 text-muted hover:text-primary disabled:opacity-30"
         title="Previous (Shift+Enter)"
       >
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M2 6.5l3-3 3 3" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <ChevronUp size={10} />
       </button>
       <button
         onClick={goNext}
@@ -162,32 +212,14 @@ export function FindBar({ editor, open, onClose }: FindBarProps) {
         className="p-0.5 rounded hover:bg-surface-2 text-muted hover:text-primary disabled:opacity-30"
         title="Next (Enter)"
       >
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M2 3.5l3 3 3-3" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <ChevronDown size={10} />
       </button>
       <button
         onClick={onClose}
         className="p-0.5 rounded hover:bg-surface-2 text-muted hover:text-primary ml-1"
         title="Close (Esc)"
       >
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M2 2l6 6M8 2l-6 6" strokeLinecap="round" />
-        </svg>
+        <X size={10} />
       </button>
     </div>
   );

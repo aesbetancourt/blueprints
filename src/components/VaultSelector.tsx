@@ -3,6 +3,7 @@ import { VaultService } from '../services/vault';
 import { mapFileEntries } from '../utils/mapFileEntries';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useToastStore } from './Toast';
+import { Box, FolderClosed } from 'lucide-react';
 
 export function VaultSelector() {
   const setVault = useWorkspaceStore((s: { setVault: (p: string) => void }) => s.setVault);
@@ -53,21 +54,7 @@ export function VaultSelector() {
       <div className="relative z-10 max-w-sm w-full text-center px-6">
         {/* Logo mark */}
         <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-surface-2 border border-default flex items-center justify-center">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M3 7L12 3l9 4v10l-9 4-9-4V7z"
-              stroke="var(--color-accent)"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M3 7l9 4 9-4M12 11v10"
-              stroke="var(--color-accent)"
-              strokeWidth="1.2"
-              strokeLinejoin="round"
-              opacity="0.6"
-            />
-          </svg>
+          <Box size={28} className="text-accent" />
         </div>
 
         <h1 className="text-2xl font-semibold text-primary tracking-tight">Blueprints</h1>
@@ -99,14 +86,7 @@ export function VaultSelector() {
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-md bg-surface-2 group-hover:bg-surface-3 border border-default flex items-center justify-center shrink-0">
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 16 16"
-                        fill="var(--color-text-muted)"
-                      >
-                        <path d="M1 3.5A1.5 1.5 0 012.5 2h3.172a1.5 1.5 0 011.06.44l.658.658A1.5 1.5 0 008.45 3.5H13.5A1.5 1.5 0 0115 5v7.5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" />
-                      </svg>
+                      <FolderClosed size={12} className="text-muted" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-sm text-primary truncate">{vault.name}</div>

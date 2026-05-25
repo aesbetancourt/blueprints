@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useRef } from 'react';
 import type { ExcalidrawElement } from '@excalidraw/excalidraw/element/types';
 import type { AppState } from '@excalidraw/excalidraw/types';
 import '@excalidraw/excalidraw/index.css';
@@ -12,6 +12,8 @@ interface ExcalidrawEditorProps {
   onChange: (content: string) => void;
 }
 
+const DARK_BG = '#0f1117';
+
 export function ExcalidrawEditor({ content, onChange }: ExcalidrawEditorProps) {
   const parsed = useMemo(() => {
     try {
@@ -24,26 +26,38 @@ export function ExcalidrawEditor({ content, onChange }: ExcalidrawEditorProps) {
     }
   }, [content]);
 
+  const lastElementsRef = useRef<string>(JSON.stringify(parsed?.elements ?? []));
+  const lastBgRef = useRef<string>(parsed?.appState?.viewBackgroundColor ?? DARK_BG);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const handleChange = useCallback(
     (elements: readonly ExcalidrawElement[], appState: AppState) => {
-      onChange(
-        JSON.stringify({
-          type: 'excalidraw',
-          version: 2,
-          source: 'blueprints',
-          elements,
-          appState: {
-            viewBackgroundColor: appState.viewBackgroundColor,
-            gridSize: appState.gridSize,
-            gridStep: appState.gridStep,
-            gridModeEnabled: appState.gridModeEnabled,
-            objectsSnapModeEnabled: appState.objectsSnapModeEnabled,
-            scrollX: appState.scrollX,
-            scrollY: appState.scrollY,
-            zoom: appState.zoom,
-          },
-        }),
-      );
+      const elementsJson = JSON.stringify(elements);
+      const elementsChanged = elementsJson !== lastElementsRef.current;
+      const bgChanged = appState.viewBackgroundColor !== lastBgRef.current;
+
+      // Only save when elements or background color actually change
+      if (!elementsChanged && !bgChanged) return;
+
+      if (elementsChanged) lastElementsRef.current = elementsJson;
+      if (bgChanged) lastBgRef.current = appState.viewBackgroundColor;
+
+      // Debounce to avoid saving on every micro-change during drawing
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onChange(
+          JSON.stringify({
+            type: 'excalidraw',
+            version: 2,
+            source: 'blueprints',
+            elements,
+            appState: {
+              viewBackgroundColor: appState.viewBackgroundColor,
+              objectsSnapModeEnabled: appState.objectsSnapModeEnabled,
+            },
+          }),
+        );
+      }, 300);
     },
     [onChange],
   );
@@ -62,7 +76,7 @@ export function ExcalidrawEditor({ content, onChange }: ExcalidrawEditorProps) {
   }
 
   return (
-    <div className="h-full w-full" style={{ minHeight: 0 }}>
+    <div className="h-full w-full bg-surface-0" style={{ minHeight: 0 }}>
       <Suspense
         fallback={
           <div className="flex h-full items-center justify-center text-secondary text-sm">
@@ -73,10 +87,6 @@ export function ExcalidrawEditor({ content, onChange }: ExcalidrawEditorProps) {
         <Excalidraw
           initialData={{
             elements: parsed.elements ?? [],
-            appState: {
-              ...parsed.appState,
-              viewBackgroundColor: parsed.appState?.viewBackgroundColor ?? '#0f1117',
-            },
           }}
           theme="dark"
           onChange={handleChange}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -11,6 +11,11 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Markdown } from 'tiptap-markdown';
+import CodeMirror from '@uiw/react-codemirror';
+import { markdown } from '@codemirror/lang-markdown';
+import { languages } from '@codemirror/language-data';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView } from '@codemirror/view';
 import { WikiLink } from './extensions/WikiLink';
 import { WikiLinkSuggestion } from './extensions/WikiLinkSuggestion';
 import { SlashCommands } from './extensions/SlashCommands';
@@ -41,7 +46,6 @@ export function MarkdownEditor({
   const editorSettings = useSettingsStore((s) => s.editor);
   const [findOpen, setFindOpen] = useState(false);
   const [rawContent, setRawContent] = useState(content);
-  const rawRef = useRef<HTMLTextAreaElement>(null);
   const prevMode = useRef(mode);
   const isInitializedRef = useRef(false);
 
@@ -163,21 +167,81 @@ export function MarkdownEditor({
       )}
 
       {mode === 'raw' && (
-        <textarea
-          ref={rawRef}
+        <RawMarkdownEditor
           value={rawContent}
-          onChange={(e) => handleRawChange(e.target.value)}
-          className="flex-1 w-full resize-none bg-transparent px-6 py-4 text-primary outline-none"
-          style={{
-            fontSize: `${editorSettings.fontSize}px`,
-            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-            lineHeight: editorSettings.lineHeight,
-            tabSize: editorSettings.tabSize,
-          }}
-          spellCheck={false}
-          autoFocus
+          onChange={handleRawChange}
+          editorSettings={editorSettings}
         />
       )}
+    </div>
+  );
+}
+
+interface RawMarkdownEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  editorSettings: { fontSize: number; lineHeight: number; tabSize: number; wordWrap: boolean };
+}
+
+function RawMarkdownEditor({ value, onChange, editorSettings }: RawMarkdownEditorProps) {
+  const isInternalChange = useRef(false);
+  const [localValue, setLocalValue] = useState(value);
+
+  useEffect(() => {
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+    setLocalValue(value);
+  }, [value]);
+
+  const handleChange = useCallback(
+    (val: string) => {
+      isInternalChange.current = true;
+      setLocalValue(val);
+      onChange(val);
+    },
+    [onChange],
+  );
+
+  const extensions = useMemo(
+    () =>
+      [
+        markdown({ codeLanguages: languages }),
+        oneDark,
+        editorSettings.wordWrap ? EditorView.lineWrapping : [],
+        EditorView.theme({
+          '&': {
+            fontSize: `${editorSettings.fontSize}px`,
+          },
+          '.cm-content': {
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            lineHeight: `${editorSettings.lineHeight}`,
+          },
+        }),
+      ].flat(),
+    [editorSettings.fontSize, editorSettings.lineHeight, editorSettings.wordWrap],
+  );
+
+  return (
+    <div className="flex-1 w-full overflow-auto" style={{ minHeight: 0 }}>
+      <CodeMirror
+        value={localValue}
+        height="100%"
+        extensions={extensions}
+        onChange={handleChange}
+        theme="dark"
+        basicSetup={{
+          lineNumbers: true,
+          foldGutter: true,
+          bracketMatching: true,
+          closeBrackets: true,
+          autocompletion: false,
+          highlightActiveLine: true,
+          tabSize: editorSettings.tabSize,
+        }}
+        style={{ height: '100%' }}
+      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 
 interface HelpPanelProps {
   open: boolean;
@@ -70,16 +71,7 @@ export function HelpPanel({ open, onClose }: HelpPanelProps) {
               onClick={onClose}
               className="p-1 rounded hover:bg-surface-2 text-muted hover:text-primary transition-colors"
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M4 4l8 8M12 4l-8 8" strokeLinecap="round" />
-              </svg>
+              <X size={16} />
             </button>
           </div>
 

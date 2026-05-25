@@ -48,11 +48,14 @@ export const VaultService = {
   },
 
   async writeFile(path: string, content: string): Promise<void> {
-    return invoke('write_file', { path, content });
+    await invoke('write_file', { path, content });
+    this._cache.set(path, content);
   },
 
   async createFile(path: string, fileType: string): Promise<string> {
-    return invoke<string>('create_file', { path, fileType });
+    this._cache.delete(path);
+    const created = await invoke<string>('create_file', { path, fileType });
+    return created;
   },
 
   async createDir(path: string): Promise<string> {
@@ -60,10 +63,12 @@ export const VaultService = {
   },
 
   async archiveFile(path: string): Promise<string> {
+    this._cache.delete(path);
     return invoke<string>('archive_file', { path });
   },
 
   async moveFile(source: string, destFolder: string): Promise<string> {
+    this._cache.delete(source);
     return invoke<string>('move_file', { source, destFolder });
   },
 
@@ -72,10 +77,13 @@ export const VaultService = {
   },
 
   async deleteFile(path: string): Promise<void> {
+    this._cache.delete(path);
     return invoke('delete_file', { path });
   },
 
   async renameFile(oldPath: string, newPath: string): Promise<void> {
+    this._cache.delete(oldPath);
+    this._cache.delete(newPath);
     return invoke('rename_file', { oldPath, newPath });
   },
 

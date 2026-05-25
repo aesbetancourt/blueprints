@@ -1,4 +1,5 @@
 import { Command } from 'cmdk';
+import { Search } from 'lucide-react';
 import { useWorkspaceStore, type FileEntry } from '../store/workspace';
 
 function flattenTree(entries: FileEntry[]): FileEntry[] {
@@ -45,18 +46,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
         }}
       >
         <div className="flex items-center px-4 border-b border-default">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="var(--color-text-muted)"
-            strokeWidth="1.5"
-            className="shrink-0"
-          >
-            <circle cx="7" cy="7" r="5" />
-            <path d="M11 11l3 3" strokeLinecap="round" />
-          </svg>
+          <Search size={14} className="shrink-0 text-muted" />
           <Command.Input
             placeholder="Search files..."
             className="flex-1 px-3 py-3.5 bg-transparent text-primary placeholder-[var(--color-text-muted)] outline-none text-sm"

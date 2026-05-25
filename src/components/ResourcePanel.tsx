@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { Cpu, X } from 'lucide-react';
 
 interface ProcessStats {
   cpu_usage: number;
@@ -45,37 +46,14 @@ export function ResourcePanel({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-default">
           <div className="flex items-center gap-2">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-accent"
-            >
-              <rect x="4" y="4" width="16" height="16" rx="2" />
-              <rect x="9" y="9" width="6" height="6" />
-              <path d="M15 2v2M15 20v2M2 15h2M20 15h2M9 2v2M9 20v2M2 9h2M20 9h2" />
-            </svg>
+            <Cpu size={14} className="text-accent" />
             <span className="text-sm font-medium text-primary">Resources</span>
           </div>
           <button
             onClick={onClose}
             className="p-1 rounded text-muted hover:text-primary hover:bg-surface-2 transition-colors"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <X size={14} />
           </button>
         </div>
 

@@ -10,9 +10,10 @@ export interface EditorSettings {
 }
 
 export interface FileSettings {
-  defaultFileType: 'md' | 'excalidraw' | 'mermaid';
+  defaultFileType: 'md' | 'excalidraw' | 'mermaid' | 'json';
   includePatterns: string[]; // only files matching these patterns are shown
   hiddenPaths: string[]; // folder/file names hidden from file explorer
+  jsonGraphMaxSizeKB: number; // JSON files above this size skip graph visualization
 }
 
 export interface TokenSettings {
@@ -67,8 +68,9 @@ const DEFAULT_EDITOR: EditorSettings = {
 
 const DEFAULT_FILE: FileSettings = {
   defaultFileType: 'md',
-  includePatterns: ['*.md', '*.excalidraw', '*.mermaid'],
+  includePatterns: ['*.md', '*.excalidraw', '*.mermaid', '*.json'],
   hiddenPaths: [],
+  jsonGraphMaxSizeKB: 500,
 };
 
 const DEFAULT_TOKEN: TokenSettings = {
@@ -174,7 +176,7 @@ export const useSettingsStore = create<SettingsState>()(
       merge: (persisted, current) => {
         const state = persisted as Partial<SettingsState> | undefined;
         if (!state) return current;
-        return {
+        const merged = {
           ...current,
           ...state,
           editor: { ...current.editor, ...state.editor },
@@ -182,6 +184,14 @@ export const useSettingsStore = create<SettingsState>()(
           token: { ...current.token, ...state.token },
           quickNote: { ...current.quickNote, ...state.quickNote },
         };
+        // Migrate: ensure *.json is in includePatterns for existing users
+        if (merged.file.includePatterns && !merged.file.includePatterns.includes('*.json')) {
+          merged.file = {
+            ...merged.file,
+            includePatterns: [...merged.file.includePatterns, '*.json'],
+          };
+        }
+        return merged;
       },
     },
   ),

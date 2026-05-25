@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronRight, Inbox } from 'lucide-react';
 import { useWorkspaceStore } from '../store/workspace';
 import { useSettingsStore } from '../store/settings';
 import { VaultService } from '../services/vault';
@@ -79,17 +80,10 @@ export function InboxSection() {
         className="w-full flex items-center justify-between px-4 py-2 group"
       >
         <div className="flex items-center gap-2 text-xs font-medium text-muted uppercase tracking-wider group-hover:text-secondary transition-colors">
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
+          <ChevronRight
+            size={10}
             className={`transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}
-          >
-            <path d="M3 1.5l4 3.5-4 3.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          />
           Inbox
         </div>
         <span className="px-1.5 py-0.5 rounded-full bg-accent text-white text-xs font-medium min-w-[20px] text-center">
@@ -178,20 +172,5 @@ export function InboxSection() {
 }
 
 function InboxFileIcon() {
-  return (
-    <svg
-      width="10"
-      height="10"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="text-muted shrink-0"
-    >
-      <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-      <path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z" />
-    </svg>
-  );
+  return <Inbox size={10} className="text-muted shrink-0" />;
 }

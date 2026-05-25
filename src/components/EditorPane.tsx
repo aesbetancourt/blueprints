@@ -6,6 +6,7 @@ import { VaultService } from '../services/vault';
 import { MarkdownEditor } from '../editors/MarkdownEditor';
 import { ExcalidrawEditor } from '../editors/ExcalidrawEditor';
 import { MermaidEditor } from '../editors/MermaidEditor';
+import { JsonCrackEditor } from '../editors/JsonCrackEditor';
 import { useToastStore } from './Toast';
 
 function computeStats(text: string, charsPerToken: number) {
@@ -20,6 +21,7 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
   const [content, setContent] = useState<string | null>(cached ?? null);
   const [error, setError] = useState<string | null>(null);
   const [showLoading, setShowLoading] = useState(false);
+  const [forceGraph, setForceGraph] = useState(false);
   const contentRef = useRef<string | null>(cached ?? null);
   const isDirtyRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,8 +44,8 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
 
     // If we already have content from the cache, skip the async read
     if (hadCachedContent.current) {
-      if (tab.fileType === 'md' && cached != null) {
-        setDocumentStats(computeStats(cached, charsPerToken));
+      if (tab.fileType === 'md' && contentRef.current != null) {
+        setDocumentStats(computeStats(contentRef.current, charsPerToken));
       }
       return;
     }
@@ -74,7 +76,7 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
       cancelled = true;
       clearTimeout(loadingTimer);
     };
-  }, [tab.filePath, tab.fileType, setDocumentStats, charsPerToken, cached]);
+  }, [tab.filePath, tab.fileType, setDocumentStats, charsPerToken]);
 
   // Clear stats when unmounting or switching to non-md
   useEffect(() => {
@@ -86,15 +88,8 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
 
   const handleChange = useCallback(
     (newContent: string) => {
+      // Called on TipTap onCreate — stores the normalized baseline
       contentRef.current = newContent;
-      setContent(newContent);
-
-      // Skip marking dirty on the very first onChange (TipTap normalization on create)
-      if (!isDirtyRef.current) {
-        // Check if this is actually different from what we have
-        // TipTap onCreate emits normalized markdown — don't mark as dirty for that
-        return;
-      }
 
       if (tab.fileType === 'md') {
         setDocumentStats(computeStats(newContent, charsPerToken));
@@ -177,6 +172,11 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
   useEffect(() => {
     return () => {
       if (isDirtyRef.current && contentRef.current !== null) {
+        // Don't save if the tab no longer exists (file was deleted/archived)
+        const tabs = useWorkspaceStore.getState().openTabs;
+        const tabStillExists = tabs.some((t) => t.id === tabIdRef.current);
+        if (!tabStillExists) return;
+
         VaultService.writeFile(tabPathRef.current, contentRef.current).catch(() => {});
         // Clear dirty state directly on the store since component is unmounting
         useWorkspaceStore.getState().markDirty(tabIdRef.current, false);
@@ -218,6 +218,38 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
     case 'mermaid':
       editor = <MermaidEditor key={tab.filePath} content={content} onChange={handleUserEdit} />;
       break;
+    case 'json': {
+      const jsonGraphMaxSizeKB = useSettingsStore.getState().file.jsonGraphMaxSizeKB ?? 500;
+      const fileSizeKB = content.length / 1024;
+      const showGraph = forceGraph || fileSizeKB <= jsonGraphMaxSizeKB;
+      editor = (
+        <div className="h-full w-full flex flex-col">
+          {!showGraph && (
+            <div className="flex items-center gap-3 px-3 py-2 bg-yellow-950/30 border-b border-yellow-900/40 shrink-0">
+              <span className="text-xs text-yellow-300/80">
+                File too large for graph visualization ({Math.round(fileSizeKB)}KB &gt;{' '}
+                {jsonGraphMaxSizeKB}KB limit)
+              </span>
+              <button
+                onClick={() => setForceGraph(true)}
+                className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-800/40 text-yellow-200 hover:bg-yellow-800/60 transition-colors"
+              >
+                Visualize anyway
+              </button>
+            </div>
+          )}
+          <div className="flex-1" style={{ minHeight: 0 }}>
+            <JsonCrackEditor
+              key={tab.filePath}
+              content={content}
+              onChange={handleUserEdit}
+              showGraph={showGraph}
+            />
+          </div>
+        </div>
+      );
+      break;
+    }
     default:
       editor = (
         <div className="flex-1 flex items-center justify-center text-neutral-400">

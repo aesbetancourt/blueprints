@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { GitCommit, RefreshCw, Plus, Minus, Undo } from 'lucide-react';
 import { useGitStore } from '../store/git';
 import { useSettingsStore } from '../store/settings';
 import { useToastStore } from './Toast';
@@ -30,6 +31,7 @@ export function GitPanel() {
     '*.md',
     '*.excalidraw',
     '*.mermaid',
+    '*.json',
   ];
   const [commitMsg, setCommitMsg] = useState('');
   const [view, setView] = useState<'changes' | 'log'>('changes');
@@ -65,7 +67,7 @@ export function GitPanel() {
       {/* Header */}
       <div className="px-3 py-2.5 border-b border-default flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <GitIcon />
+          <GitCommit size={14} />
           <span className="text-xs font-medium text-primary">Git</span>
           {branches && (
             <span className="text-xs text-accent px-1.5 py-0.5 rounded bg-accent-glow">
@@ -81,7 +83,7 @@ export function GitPanel() {
           className="p-1 rounded text-muted hover:text-primary hover:bg-surface-2 transition-colors"
           title="Refresh"
         >
-          <RefreshIcon />
+          <RefreshCw size={12} />
         </button>
       </div>
 
@@ -317,7 +319,7 @@ function FileSection({
                   title="Discard"
                   danger
                 >
-                  <DiscardIcon />
+                  <Undo size={12} />
                 </ActionBtn>
               )}
               <ActionBtn
@@ -327,7 +329,7 @@ function FileSection({
                 }}
                 title={actionTitle}
               >
-                {isStaged ? <MinusIcon /> : <PlusIcon />}
+                {isStaged ? <Minus size={12} /> : <Plus size={12} />}
               </ActionBtn>
             </div>
           </div>
@@ -453,96 +455,6 @@ function StatusBadge({ status }: { status: string }) {
     >
       {labels[status] ?? '?'}
     </span>
-  );
-}
-
-// --- Icons ---
-
-function GitIcon() {
-  return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="18" r="3" />
-      <circle cx="12" cy="6" r="3" />
-      <path d="M12 9v6" />
-    </svg>
-  );
-}
-
-function RefreshIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="23 4 23 10 17 10" />
-      <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-    >
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-function MinusIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-    >
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-function DiscardIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="1 4 1 10 7 10" />
-      <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
-    </svg>
   );
 }
 

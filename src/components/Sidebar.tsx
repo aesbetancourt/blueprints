@@ -1,4 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
+import {
+  Box,
+  ChevronDown,
+  ArrowRight,
+  X,
+  PanelLeftClose,
+  ChevronRight,
+  Clock,
+  CheckSquare,
+  Archive,
+  Eye,
+  EyeOff,
+  ArrowDownWideNarrow,
+  Check,
+} from 'lucide-react';
 import { FileExplorer } from './FileExplorer';
 import { CreateFileButton } from './CreateFile';
 import { TableOfContents } from './TableOfContents';
@@ -10,8 +25,16 @@ import { useWorkspaceStore, type SortMode } from '../store/workspace';
 
 export function Sidebar() {
   const vaultPath = useWorkspaceStore((s: { vaultPath: string | null }) => s.vaultPath);
-  const { recentFiles, openFile, sortMode, setSortMode, toggleSidebar, closeVault } =
-    useWorkspaceStore();
+  const {
+    recentFiles,
+    openFile,
+    sortMode,
+    setSortMode,
+    foldersFirst,
+    setFoldersFirst,
+    toggleSidebar,
+    closeVault,
+  } = useWorkspaceStore();
   const vaultName = vaultPath ? vaultPath.split('/').pop() : 'Vault';
   const [showRecent, setShowRecent] = useState(false);
   const [showVaultMenu, setShowVaultMenu] = useState(false);
@@ -51,33 +74,10 @@ export function Sidebar() {
             title="Workspace options"
           >
             <div className="w-5 h-5 rounded bg-accent-glow flex items-center justify-center">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path
-                  d="M1 2.5L5 1l4 1.5v5L5 9 1 7.5v-5z"
-                  stroke="var(--color-accent)"
-                  strokeWidth="1"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M1 2.5L5 4l4-1.5M5 4v5"
-                  stroke="var(--color-accent)"
-                  strokeWidth="0.8"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <Box size={10} className="text-accent" strokeWidth={1.5} />
             </div>
             <span className="text-sm font-medium text-primary truncate max-w-28">{vaultName}</span>
-            <svg
-              width="8"
-              height="8"
-              viewBox="0 0 8 8"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="text-muted"
-            >
-              <path d="M2 3l2 2 2-2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <ChevronDown size={8} className="text-muted" strokeWidth={1.5} />
           </button>
 
           {/* Vault/workspace menu */}
@@ -96,16 +96,7 @@ export function Sidebar() {
                 }}
                 className="w-full text-left px-3 py-1.5 text-xs text-secondary hover:text-primary hover:bg-surface-2 flex items-center gap-2"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M3 8h7M7 5l3 3-3 3" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <ArrowRight size={11} strokeWidth={1.5} />
                 Switch Workspace
               </button>
               <button
@@ -115,16 +106,7 @@ export function Sidebar() {
                 }}
                 className="w-full text-left px-3 py-1.5 text-xs text-secondary hover:text-primary hover:bg-surface-2 flex items-center gap-2"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M4 4l8 8M12 4l-8 8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <X size={11} strokeWidth={1.5} />
                 Close Workspace
               </button>
             </div>
@@ -137,18 +119,7 @@ export function Sidebar() {
             className="p-1.5 rounded-md hover:bg-surface-2 text-muted hover:text-primary transition-colors"
             title="Collapse sidebar (⌘B)"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <rect x="1" y="2" width="14" height="12" rx="1.5" />
-              <path d="M5 2v12" />
-              <path d="M10 7l-2 1.5 2 1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <PanelLeftClose size={14} strokeWidth={1.5} />
           </button>
         </div>
       </div>
@@ -168,99 +139,51 @@ export function Sidebar() {
               onClick={() => setFilesExpanded(!filesExpanded)}
               className="flex items-center gap-2 text-xs font-medium text-muted uppercase tracking-wider hover:text-secondary transition-colors"
             >
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 10 10"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
+              <ChevronRight
+                size={10}
+                strokeWidth={1.5}
                 className={`transition-transform duration-150 ${filesExpanded ? 'rotate-90' : ''}`}
-              >
-                <path d="M3 1.5l4 3.5-4 3.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              />
               Files
             </button>
             <div className="flex items-center gap-1">
-              <SortButton mode={sortMode} onChange={setSortMode} />
+              <SortButton
+                mode={sortMode}
+                onChange={setSortMode}
+                foldersFirst={foldersFirst}
+                onFoldersFirstChange={setFoldersFirst}
+              />
               <button
                 onClick={() => setShowRecent(!showRecent)}
                 className={`p-1 rounded hover:bg-surface-2 transition-colors ${showRecent ? 'text-accent' : 'text-muted hover:text-secondary'}`}
                 title="Recent files"
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <circle cx="8" cy="8" r="6" />
-                  <path d="M8 5v3l2 2" strokeLinecap="round" />
-                </svg>
+                <Clock size={12} strokeWidth={1.5} />
               </button>
               <button
                 onClick={() => setIsSelectMode(!isSelectMode)}
                 className={`p-1 rounded hover:bg-surface-2 transition-colors ${isSelectMode ? 'text-accent' : 'text-muted hover:text-secondary'}`}
                 title={isSelectMode ? 'Exit select mode' : 'Select to move'}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <rect x="2" y="2" width="12" height="12" rx="2" />
-                  <path d="M5 8l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <CheckSquare size={12} strokeWidth={1.5} />
               </button>
               <button
                 onClick={() => setShowArchive(!showArchive)}
                 className={`p-1 rounded hover:bg-surface-2 transition-colors ${showArchive ? 'text-accent' : 'text-muted hover:text-secondary'}`}
                 title={showArchive ? 'Hide archive' : 'Show archive'}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <polyline points="21 8 21 21 3 21 3 8" />
-                  <rect x="1" y="3" width="22" height="5" />
-                  <line x1="10" y1="12" x2="14" y2="12" />
-                </svg>
+                <Archive size={12} strokeWidth={1.5} />
               </button>
               <button
                 onClick={() => setShowHidden(!showHidden)}
                 className={`p-1 rounded hover:bg-surface-2 transition-colors ${showHidden ? 'text-accent' : 'text-muted hover:text-secondary'}`}
                 title={showHidden ? 'Hide hidden items' : 'Show hidden items'}
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  {showHidden ? (
-                    <>
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </>
-                  ) : (
-                    <>
-                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
-                      <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </>
-                  )}
-                </svg>
+                {showHidden ? (
+                  <Eye size={12} strokeWidth={1.5} />
+                ) : (
+                  <EyeOff size={12} strokeWidth={1.5} />
+                )}
               </button>
             </div>
           </div>
@@ -325,17 +248,11 @@ function PinnedFiles() {
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-muted uppercase tracking-wider hover:text-secondary transition-colors"
       >
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
+        <ChevronRight
+          size={10}
+          strokeWidth={1.5}
           className={`transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}
-        >
-          <path d="M3 1.5l4 3.5-4 3.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        />
         Pinned
         <span className="ml-auto px-1.5 py-0.5 rounded bg-surface-2 text-muted font-mono text-xs">
           {pinnedFiles.length}
@@ -358,18 +275,7 @@ function PinnedFiles() {
                   className="hidden group-hover:block p-0.5 text-muted hover:text-danger rounded"
                   title="Unpin"
                 >
-                  <svg
-                    width="10"
-                    height="10"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <line x1="4" y1="4" x2="12" y2="12" />
-                    <line x1="12" y1="4" x2="4" y2="12" />
-                  </svg>
+                  <X size={10} strokeWidth={2} />
                 </button>
               </div>
             );
@@ -380,42 +286,80 @@ function PinnedFiles() {
   );
 }
 
-function SortButton({ mode, onChange }: { mode: SortMode; onChange: (m: SortMode) => void }) {
+function SortButton({
+  mode,
+  onChange,
+  foldersFirst,
+  onFoldersFirstChange,
+}: {
+  mode: SortMode;
+  onChange: (m: SortMode) => void;
+  foldersFirst: boolean;
+  onFoldersFirstChange: (v: boolean) => void;
+}) {
   const [open, setOpen] = useState(false);
-  const labels: Record<SortMode, string> = { name: 'Name', type: 'Type', date: 'Date' };
+  const ref = useRef<HTMLDivElement>(null);
+
+  const options: { value: SortMode; label: string; icon: string }[] = [
+    { value: 'name', label: 'Name', icon: 'A' },
+    { value: 'type', label: 'Type', icon: 'T' },
+    { value: 'date', label: 'Date', icon: 'D' },
+    { value: 'recent', label: 'Recent', icon: 'R' },
+  ];
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
         className="p-1 rounded hover:bg-surface-2 text-muted hover:text-secondary transition-colors"
-        title={`Sort: ${labels[mode]}`}
+        title={`Sort: ${options.find((o) => o.value === mode)?.label}`}
       >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M2 4h12M4 8h8M6 12h4" strokeLinecap="round" />
-        </svg>
+        <ArrowDownWideNarrow size={12} strokeWidth={1.5} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-surface-1 border border-default rounded-lg shadow-xl z-50 py-1 w-28">
-          {(['name', 'type', 'date'] as SortMode[]).map((m) => (
+        <div className="absolute right-0 top-full mt-1 bg-surface-1 border border-default rounded-lg shadow-xl z-50 py-1 w-40">
+          <div className="px-2.5 py-1 text-[10px] font-medium text-muted uppercase tracking-wider">
+            Sort by
+          </div>
+          {options.map((opt) => (
             <button
-              key={m}
+              key={opt.value}
               onClick={() => {
-                onChange(m);
+                onChange(opt.value);
                 setOpen(false);
               }}
-              className={`w-full text-left px-3 py-1.5 text-xs hover:bg-surface-2 ${mode === m ? 'text-accent' : 'text-secondary'}`}
+              className={`w-full text-left px-2.5 py-1.5 text-xs flex items-center gap-2 hover:bg-surface-2 ${
+                mode === opt.value ? 'text-accent' : 'text-secondary'
+              }`}
             >
-              {labels[m]}
+              <span className="w-4 text-center shrink-0">
+                {mode === opt.value && <Check size={10} strokeWidth={1.5} />}
+              </span>
+              {opt.label}
             </button>
           ))}
+          <div className="border-t border-default my-1" />
+          <button
+            onClick={() => onFoldersFirstChange(!foldersFirst)}
+            className="w-full text-left px-2.5 py-1.5 text-xs flex items-center gap-2 hover:bg-surface-2 text-secondary"
+          >
+            <span className="w-4 text-center shrink-0">
+              {foldersFirst && <Check size={10} strokeWidth={1.5} />}
+            </span>
+            Folders first
+          </button>
         </div>
       )}
     </div>

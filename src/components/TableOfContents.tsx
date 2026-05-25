@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useWorkspaceStore } from '../store/workspace';
 import { VaultService } from '../services/vault';
 
@@ -60,17 +61,10 @@ export function TableOfContents() {
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-muted uppercase tracking-wider hover:text-secondary transition-colors"
       >
-        <svg
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
+        <ChevronRight
+          size={10}
           className={`transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}
-        >
-          <path d="M3 1.5l4 3.5-4 3.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        />
         Outline
         <span className="ml-auto px-1.5 py-0.5 rounded bg-surface-2 text-muted font-mono text-xs">
           {headings.length}

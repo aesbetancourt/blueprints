@@ -135,8 +135,9 @@ pub async fn create_file(path: String, file_type: String, state: tauri::State<'_
 
     let content = match file_type.as_str() {
         "md" => String::new(),
-        "excalidraw" => r#"{"type":"excalidraw","version":2,"source":"blueprints","elements":[],"appState":{}}"#.to_string(),
+        "excalidraw" => "{\"type\":\"excalidraw\",\"version\":2,\"source\":\"blueprints\",\"elements\":[],\"appState\":{\"viewBackgroundColor\":\"#0f1117\"}}".to_string(),
         "mermaid" => "flowchart TD\n    Start --> End".to_string(),
+        "json" => "{\n  \n}".to_string(),
         _ => String::new(),
     };
 

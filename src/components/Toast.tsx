@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { X } from 'lucide-react';
 
 interface Toast {
   id: string;
@@ -42,16 +43,7 @@ export function ToastContainer() {
             onClick={() => removeToast(toast.id)}
             className="text-inherit opacity-50 hover:opacity-100"
           >
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M2 2l6 6M8 2l-6 6" strokeLinecap="round" />
-            </svg>
+            <X size={10} />
           </button>
         </div>
       ))}

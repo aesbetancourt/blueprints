@@ -2,7 +2,7 @@ export interface Template {
   id: string;
   label: string;
   description: string;
-  fileType: 'md' | 'excalidraw' | 'mermaid';
+  fileType: 'md' | 'excalidraw' | 'mermaid' | 'json';
   content: string;
   icon: string;
   suggestedName: string;
@@ -128,5 +128,26 @@ export const templates: Template[] = [
     content: '',
     icon: 'canvas',
     suggestedName: 'drawing-',
+  },
+
+  // JSON templates
+  {
+    id: 'json-blank',
+    label: 'JSON Document',
+    description: 'Empty JSON file with graph visualization',
+    fileType: 'json',
+    content: '{\n  \n}',
+    icon: 'json',
+    suggestedName: 'data-',
+  },
+  {
+    id: 'json-api-response',
+    label: 'API Response',
+    description: 'Sample API response structure for visualization',
+    fileType: 'json',
+    content:
+      '{\n  "status": "success",\n  "data": {\n    "users": [\n      {\n        "id": 1,\n        "name": "Example User",\n        "email": "user@example.com",\n        "roles": ["admin", "editor"]\n      }\n    ],\n    "pagination": {\n      "page": 1,\n      "perPage": 20,\n      "total": 1\n    }\n  }\n}',
+    icon: 'json',
+    suggestedName: 'api-response-',
   },
 ];

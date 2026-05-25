@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { VaultService } from '../services/vault';
 
-export type FileType = 'md' | 'excalidraw' | 'mermaid';
+export type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json';
 
 export interface Tab {
   id: string;
@@ -19,7 +19,12 @@ export interface FileEntry {
   children?: FileEntry[];
 }
 
-export type SortMode = 'name' | 'type' | 'date';
+export type SortMode = 'name' | 'type' | 'date' | 'recent';
+
+export interface SortConfig {
+  mode: SortMode;
+  foldersFirst: boolean;
+}
 
 export interface RecentVault {
   path: string;
@@ -44,6 +49,7 @@ interface WorkspaceState {
   recentVaults: RecentVault[];
   splitTabId: string | null;
   sortMode: SortMode;
+  foldersFirst: boolean;
   documentStats: DocumentStats | null;
   pinnedFiles: string[];
 
@@ -61,6 +67,7 @@ interface WorkspaceState {
   prevTab: () => void;
   setSplitTab: (id: string | null) => void;
   setSortMode: (mode: SortMode) => void;
+  setFoldersFirst: (value: boolean) => void;
   updateTabPath: (oldPath: string, newPath: string) => void;
   closeAllTabs: () => void;
   closeOtherTabs: (id: string) => void;
@@ -72,6 +79,7 @@ interface WorkspaceState {
 function getFileType(path: string): FileType {
   if (path.endsWith('.excalidraw')) return 'excalidraw';
   if (path.endsWith('.mermaid')) return 'mermaid';
+  if (path.endsWith('.json')) return 'json';
   return 'md';
 }
 
@@ -92,6 +100,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       recentVaults: [],
       splitTabId: null,
       sortMode: 'name' as SortMode,
+      foldersFirst: true,
       documentStats: null,
       pinnedFiles: [],
 
@@ -182,6 +191,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       setSplitTab: (id) => set({ splitTabId: id }),
 
       setSortMode: (mode) => set({ sortMode: mode }),
+      setFoldersFirst: (value) => set({ foldersFirst: value }),
 
       updateTabPath: (oldPath, newPath) =>
         set((s) => {
@@ -271,6 +281,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         recentFiles: state.recentFiles,
         recentVaults: state.recentVaults,
         sortMode: state.sortMode,
+        foldersFirst: state.foldersFirst,
         pinnedFiles: state.pinnedFiles,
       }),
     },

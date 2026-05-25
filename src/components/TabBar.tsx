@@ -1,64 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
+import { FileText, Pencil, Network, File, X, PanelLeftOpen } from 'lucide-react';
 import { useWorkspaceStore, type Tab } from '../store/workspace';
 import { confirm } from './ConfirmDialog';
 
 function TabIcon({ fileType }: { fileType: string }) {
   switch (fileType) {
     case 'md':
-      return (
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-          className="shrink-0"
-          fill="var(--color-accent)"
-        >
-          <path d="M2 2h12v12H2V2zm2 3v6h1.5V7.5L7 9.5l1.5-2V11H10V5H8.5l-1.5 2-1.5-2H4z" />
-        </svg>
-      );
+      return <FileText size={12} className="shrink-0" style={{ color: 'var(--color-accent)' }} />;
     case 'excalidraw':
-      return (
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-          className="shrink-0"
-          fill="none"
-          stroke="var(--color-warning)"
-          strokeWidth="1.3"
-        >
-          <path d="M12 2L14 4 5 13H3v-2L12 2z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      );
+      return <Pencil size={12} className="shrink-0" style={{ color: 'var(--color-warning)' }} />;
     case 'mermaid':
-      return (
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-          className="shrink-0"
-          fill="none"
-          stroke="var(--color-success)"
-          strokeWidth="1.3"
-        >
-          <rect x="2" y="1" width="5" height="3" rx="0.5" />
-          <rect x="9" y="6" width="5" height="3" rx="0.5" />
-          <rect x="2" y="12" width="5" height="3" rx="0.5" />
-          <path d="M4.5 4v4h7M4.5 8v4" strokeLinecap="round" />
-        </svg>
-      );
+      return <Network size={12} className="shrink-0" style={{ color: 'var(--color-success)' }} />;
     default:
-      return (
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 16 16"
-          className="shrink-0"
-          fill="var(--color-text-muted)"
-        >
-          <path d="M4 1h5l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1zm4.5 0v4H13" />
-        </svg>
-      );
+      return <File size={12} className="shrink-0" style={{ color: 'var(--color-text-muted)' }} />;
   }
 }
 
@@ -162,16 +116,7 @@ export function TabBar() {
               }}
               className="ml-0.5 w-4 h-4 rounded flex items-center justify-center text-muted hover:text-primary hover:bg-surface-3 opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <svg
-                width="8"
-                height="8"
-                viewBox="0 0 8 8"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M1.5 1.5l5 5M6.5 1.5l-5 5" strokeLinecap="round" />
-              </svg>
+              <X size={8} className="stroke-current" strokeWidth={1.5} />
             </span>
           </button>
         );
@@ -290,18 +235,7 @@ function SidebarExpandButton({ onClick }: { onClick: () => void }) {
       className="h-full px-3 flex items-center text-muted hover:text-primary hover:bg-surface-2 transition-colors border-r border-default"
       title="Expand sidebar (⌘B)"
     >
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 16 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <rect x="1" y="2" width="14" height="12" rx="1.5" />
-        <path d="M5 2v12" />
-        <path d="M8 7l2 1.5-2 1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+      <PanelLeftOpen size={14} />
     </button>
   );
 }

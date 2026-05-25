@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { ZoomIn, ZoomOut } from 'lucide-react';
 import mermaid from 'mermaid';
 
 mermaid.initialize({
@@ -88,18 +89,7 @@ export function MermaidEditor({ content, onChange }: MermaidEditorProps) {
                 className="p-1 rounded hover:bg-surface-2 text-muted hover:text-secondary"
                 title="Zoom out"
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <circle cx="7" cy="7" r="5" />
-                  <path d="M5 7h4" strokeLinecap="round" />
-                  <path d="M11 11l3 3" strokeLinecap="round" />
-                </svg>
+                <ZoomOut size={12} />
               </button>
               <button
                 onClick={zoomReset}
@@ -113,18 +103,7 @@ export function MermaidEditor({ content, onChange }: MermaidEditorProps) {
                 className="p-1 rounded hover:bg-surface-2 text-muted hover:text-secondary"
                 title="Zoom in"
               >
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <circle cx="7" cy="7" r="5" />
-                  <path d="M5 7h4M7 5v4" strokeLinecap="round" />
-                  <path d="M11 11l3 3" strokeLinecap="round" />
-                </svg>
+                <ZoomIn size={12} />
               </button>
             </div>
           </div>

@@ -1,4 +1,15 @@
 import { useState, useEffect, useLayoutEffect, useRef, createContext, useContext } from 'react';
+import {
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  MoveUp,
+  MoveRight,
+  Pencil,
+  Trash2,
+  EyeOff,
+  Check,
+} from 'lucide-react';
 import { useWorkspaceStore, type FileEntry, type SortMode } from '../store/workspace';
 import { useSettingsStore } from '../store/settings';
 import { confirm } from './ConfirmDialog';
@@ -56,7 +67,7 @@ export function FileExplorer({
   onEnterSelectMode: () => void;
   onExitSelectMode: () => void;
 }) {
-  const { fileTree, vaultPath, sortMode } = useWorkspaceStore();
+  const { fileTree, vaultPath, sortMode, foldersFirst, recentFiles } = useWorkspaceStore();
   const { setFileTree, updateTabPath, openFile, closeTab } = useWorkspaceStore();
   const { addToast } = useToastStore();
   const [createMenu, setCreateMenu] = useState<{
@@ -73,7 +84,7 @@ export function FileExplorer({
   const fileMenuActionsRef = useRef<FileContextMenuActions | null>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
 
-  const sortedTree = sortTree(fileTree, sortMode);
+  const sortedTree = sortTree(fileTree, sortMode, foldersFirst, recentFiles);
 
   // Settings-based filtering
   const {
@@ -86,7 +97,12 @@ export function FileExplorer({
     addTag,
   } = useSettingsStore();
   const hiddenPaths = fileSettings.hiddenPaths ?? [];
-  const includePatterns = fileSettings.includePatterns ?? ['*.md', '*.excalidraw', '*.mermaid'];
+  const includePatterns = fileSettings.includePatterns ?? [
+    '*.md',
+    '*.excalidraw',
+    '*.mermaid',
+    '*.json',
+  ];
 
   // Filter out _archive folder unless toggled on, and hidden items unless revealed
   // Also apply include patterns (directories always pass if they have visible descendants)
@@ -198,6 +214,39 @@ export function FileExplorer({
     setSelectedPaths(new Set());
   };
 
+  const deleteSelected = async () => {
+    if (selectedPaths.size === 0) return;
+    const count = selectedPaths.size;
+    const confirmed = await confirm({
+      title: 'Move to Trash',
+      message: `Are you sure you want to move ${count} item${count > 1 ? 's' : ''} to the trash?`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    const errors: string[] = [];
+    for (const filePath of selectedPaths) {
+      try {
+        await VaultService.deleteFile(filePath);
+        closeTab(filePath);
+      } catch (err) {
+        const fileName = filePath.split('/').pop() ?? filePath;
+        errors.push(`Failed to delete "${fileName}": ${err}`);
+      }
+    }
+
+    if (errors.length > 0) {
+      addToast(errors.join('\n'), 'error');
+    } else {
+      addToast(`Deleted ${count} item${count > 1 ? 's' : ''}`, 'success');
+    }
+
+    setSelectedPaths(new Set());
+    onExitSelectMode();
+    await refreshTree();
+  };
+
   // Press Escape to cancel move or exit select mode
   useEffect(() => {
     if (!movingPaths.length && !isSelectMode) return;
@@ -291,12 +340,20 @@ export function FileExplorer({
           <span className="text-xs text-secondary">{selectedPaths.size} selected</span>
           <div className="flex items-center gap-1">
             {selectedPaths.size > 0 && (
-              <button
-                onClick={() => startMove(Array.from(selectedPaths))}
-                className="text-xs text-accent hover:text-primary px-1.5 py-0.5 rounded hover:bg-surface-3"
-              >
-                Move
-              </button>
+              <>
+                <button
+                  onClick={() => startMove(Array.from(selectedPaths))}
+                  className="text-xs text-accent hover:text-primary px-1.5 py-0.5 rounded hover:bg-surface-3"
+                >
+                  Move
+                </button>
+                <button
+                  onClick={deleteSelected}
+                  className="text-xs text-red-400 hover:text-red-300 px-1.5 py-0.5 rounded hover:bg-red-950/30"
+                >
+                  Delete
+                </button>
+              </>
             )}
             <button
               onClick={exitSelectMode}
@@ -327,16 +384,7 @@ export function FileExplorer({
           onClick={() => executeMove(vaultPath)}
           className="w-full px-2 py-1.5 mb-1 rounded-md border border-dashed border-accent text-xs text-accent hover:bg-accent-glow transition-colors flex items-center gap-1.5"
         >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <path d="M8 12V4M5 7l3-3 3 3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <MoveUp size={12} />
           Move to root
         </button>
       )}
@@ -464,17 +512,10 @@ export function FileExplorer({
             className="w-full px-3 py-1.5 text-left text-xs text-secondary hover:text-primary hover:bg-surface-2 flex items-center justify-between"
           >
             <span>Tags</span>
-            <svg
-              width="8"
-              height="8"
-              viewBox="0 0 8 8"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
+            <ChevronDown
+              size={8}
               className={`transition-transform ${tagMenuOpen ? 'rotate-180' : ''}`}
-            >
-              <path d="M2 3l2 2 2-2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            />
           </button>
           {tagMenuOpen && (
             <div className="px-2 py-1 border-t border-b border-default bg-surface-0">
@@ -501,19 +542,7 @@ export function FileExplorer({
                     <span className={isAssigned ? 'text-primary font-medium' : 'text-secondary'}>
                       {tag.label}
                     </span>
-                    {isAssigned && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="ml-auto text-accent"
-                      >
-                        <path d="M3 8l3 3 7-7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
+                    {isAssigned && <Check size={10} className="ml-auto text-accent" />}
                   </button>
                 );
               })}
@@ -667,11 +696,18 @@ function hasVisibleDescendants(
   });
 }
 
-function sortTree(entries: FileEntry[], mode: SortMode): FileEntry[] {
+function sortTree(
+  entries: FileEntry[],
+  mode: SortMode,
+  foldersFirst: boolean,
+  recentFiles?: string[],
+): FileEntry[] {
   const sorted = [...entries].sort((a, b) => {
-    // Directories always first
-    if (a.isDirectory && !b.isDirectory) return -1;
-    if (!a.isDirectory && b.isDirectory) return 1;
+    // Directories grouping
+    if (foldersFirst) {
+      if (a.isDirectory && !b.isDirectory) return -1;
+      if (!a.isDirectory && b.isDirectory) return 1;
+    }
 
     switch (mode) {
       case 'type': {
@@ -682,6 +718,16 @@ function sortTree(entries: FileEntry[], mode: SortMode): FileEntry[] {
       }
       case 'date':
         return b.name.localeCompare(a.name);
+      case 'recent': {
+        if (!recentFiles) return a.name.localeCompare(b.name);
+        const idxA = recentFiles.indexOf(a.path);
+        const idxB = recentFiles.indexOf(b.path);
+        // Files not in recent list go to the end, sorted by name
+        if (idxA === -1 && idxB === -1) return a.name.localeCompare(b.name);
+        if (idxA === -1) return 1;
+        if (idxB === -1) return -1;
+        return idxA - idxB; // lower index = more recent
+      }
       case 'name':
       default:
         return a.name.localeCompare(b.name);
@@ -690,7 +736,7 @@ function sortTree(entries: FileEntry[], mode: SortMode): FileEntry[] {
 
   return sorted.map((entry) => {
     if (entry.isDirectory && entry.children) {
-      return { ...entry, children: sortTree(entry.children, mode) };
+      return { ...entry, children: sortTree(entry.children, mode, foldersFirst, recentFiles) };
     }
     return entry;
   });
@@ -826,26 +872,11 @@ function TreeNode({
             className="flex-1 text-left px-2 py-1 flex items-center gap-1.5"
             style={{ paddingLeft: isSelectMode ? '4px' : paddingLeft }}
           >
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
+            <ChevronRight
+              size={10}
               className={`transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}
-            >
-              <path d="M3 1.5l4 3.5-4 3.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 16 16"
-              fill="var(--color-text-muted)"
-              className="shrink-0"
-            >
-              <path d="M1 3.5A1.5 1.5 0 012.5 2h3.172a1.5 1.5 0 011.06.44l.658.658A1.5 1.5 0 008.45 3.5H13.5A1.5 1.5 0 0115 5v7.5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" />
-            </svg>
+            />
+            <Folder size={13} fill="var(--color-text-muted)" className="shrink-0" />
             {renaming ? (
               <input
                 ref={renameRef}
@@ -864,29 +895,7 @@ function TreeNode({
                 {node.name}
               </span>
             )}
-            {isHidden && (
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="shrink-0 text-muted opacity-60 ml-1"
-              >
-                <path
-                  d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
+            {isHidden && <EyeOff size={10} className="shrink-0 text-muted opacity-60 ml-1" />}
             {nodeTags.length > 0 && (
               <span className="flex items-center gap-0.5 ml-1 shrink-0">
                 {nodeTags.map((tag) => (
@@ -913,36 +922,14 @@ function TreeNode({
                 className="p-0.5 rounded hover:bg-surface-3 text-muted hover:text-primary"
                 title="Rename"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M11 2l3 3-9 9H2v-3l9-9z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <Pencil size={11} />
               </button>
               <button
                 onClick={handleDelete}
                 className="p-0.5 rounded hover:bg-surface-3 text-muted hover:text-danger"
                 title="Delete"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path
-                    d="M3 4h10M6 4V3h4v1M5 4v9h6V4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Trash2 size={11} />
               </button>
               <button
                 onClick={(e) => {
@@ -952,16 +939,7 @@ function TreeNode({
                 className="p-0.5 rounded hover:bg-surface-3 text-muted hover:text-accent"
                 title="Move"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M4 8h8M10 5l3 3-3 3" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <MoveRight size={11} />
               </button>
             </div>
           )}
@@ -1055,29 +1033,7 @@ function TreeNode({
             <span className={`truncate text-xs ${isHidden ? 'opacity-40 italic' : ''}`}>
               {node.name}
             </span>
-            {isHidden && (
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="shrink-0 text-muted opacity-60"
-              >
-                <path
-                  d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <line x1="1" y1="1" x2="23" y2="23" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
+            {isHidden && <EyeOff size={10} className="shrink-0 text-muted opacity-60" />}
             {nodeTags.length > 0 && (
               <span className="flex items-center gap-0.5 ml-auto shrink-0">
                 {nodeTags.map((tag) => (
@@ -1103,36 +1059,14 @@ function TreeNode({
                 className="p-0.5 rounded hover:bg-surface-3 text-muted hover:text-primary"
                 title="Rename"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M11 2l3 3-9 9H2v-3l9-9z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <Pencil size={11} />
               </button>
               <button
                 onClick={handleDelete}
                 className="p-0.5 rounded hover:bg-surface-3 text-muted hover:text-danger"
                 title="Delete"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path
-                    d="M3 4h10M6 4V3h4v1M5 4v9h6V4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Trash2 size={11} />
               </button>
               <button
                 onClick={(e) => {
@@ -1142,16 +1076,7 @@ function TreeNode({
                 className="p-0.5 rounded hover:bg-surface-3 text-muted hover:text-accent"
                 title="Move"
               >
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M4 8h8M10 5l3 3-3 3" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <MoveRight size={11} />
               </button>
             </div>
           )}
@@ -1310,17 +1235,7 @@ export function MoveToModal({
 }
 
 function FolderSmallIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 16 16"
-      fill="var(--color-text-muted)"
-      className="shrink-0"
-    >
-      <path d="M1 3.5A1.5 1.5 0 012.5 2h3.172a1.5 1.5 0 011.06.44l.658.658A1.5 1.5 0 008.45 3.5H13.5A1.5 1.5 0 0115 5v7.5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" />
-    </svg>
-  );
+  return <Folder size={12} fill="var(--color-text-muted)" className="shrink-0" />;
 }
 
 function FileIcon({ ext }: { ext: string | undefined }) {

@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { FolderClosed, Plus } from 'lucide-react';
 import { useWorkspaceStore } from '../store/workspace';
 import { VaultService } from '../services/vault';
 import { mapFileEntries } from '../utils/mapFileEntries';
 import { useToastStore } from './Toast';
 import { templates, type Template } from '../data/templates';
 
-type FileType = 'md' | 'excalidraw' | 'mermaid';
+type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json';
 
 interface NewFileMenuProps {
   targetDir?: string;
@@ -50,6 +51,7 @@ function NewFileMenu({ targetDir, onClose, position }: NewFileMenuProps) {
     md: '.md',
     excalidraw: '.excalidraw',
     mermaid: '.mermaid',
+    json: '.json',
   };
 
   const handleTypeSelect = (type: FileType) => {
@@ -164,20 +166,22 @@ function NewFileMenu({ targetDir, onClose, position }: NewFileMenuProps) {
             />
             Mermaid
           </button>
+          <button
+            onClick={() => handleTypeSelect('json')}
+            className="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-surface-2 hover:text-primary flex items-center gap-2.5"
+          >
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: 'var(--color-info, #3b82f6)' }}
+            />
+            JSON
+          </button>
           <div className="border-t border-default my-1" />
           <button
             onClick={handleFolderStep}
             className="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-surface-2 hover:text-primary flex items-center gap-2.5"
           >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 16 16"
-              fill="var(--color-text-muted)"
-              className="shrink-0"
-            >
-              <path d="M1 3.5A1.5 1.5 0 012.5 2h3.172a1.5 1.5 0 011.06.44l.658.658A1.5 1.5 0 008.45 3.5H13.5A1.5 1.5 0 0115 5v7.5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5v-9z" />
-            </svg>
+            <FolderClosed size={12} className="shrink-0 text-muted" />
             Folder
           </button>
         </div>
@@ -284,16 +288,7 @@ export function CreateFileButton() {
         className="p-1.5 rounded-md hover:bg-surface-2 text-muted hover:text-primary transition-colors"
         title="New file (⌘N)"
       >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        >
-          <path d="M7 2.5v9M2.5 7h9" strokeLinecap="round" />
-        </svg>
+        <Plus size={14} />
       </button>
     </div>
   );

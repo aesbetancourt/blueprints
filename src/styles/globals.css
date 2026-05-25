@@ -179,6 +179,10 @@ a,
 .text-error {
   color: var(--color-danger);
 }
+
+.text-error {
+  color: var(--color-danger);
+}
 .hover\:text-error:hover {
   color: var(--color-danger);
 }

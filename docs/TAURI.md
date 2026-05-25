@@ -4,7 +4,7 @@ This document explains how Tauri v2 works in this project — the mental model, 
 
 ## What is Tauri?
 
-Tauri is a framework for building desktop apps with a Rust backend and a web frontend (HTML/CSS/JS). Unlike Electron, it uses the OS native WebView (WebKit on macOS, WebView2 on Windows) instead of bundling Chromium, resulting in tiny binaries (~10MB vs ~150MB).
+Tauri is a framework for building desktop apps with a Rust backend and a web frontend (HTML/CSS/JS). Unlike Electron, it uses the OS native WebView (WebKit on macOS, WebView2 on Windows) instead of bundling Chromium, resulting in tiny binaries (\~10MB vs \~150MB).
 
 **Key difference from a web app:** The frontend cannot access the filesystem, spawn processes, or do anything "native" directly. All native operations go through Tauri's IPC bridge to the Rust backend.
 
