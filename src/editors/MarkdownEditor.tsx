@@ -43,6 +43,7 @@ export function MarkdownEditor({
   const [rawContent, setRawContent] = useState(content);
   const rawRef = useRef<HTMLTextAreaElement>(null);
   const prevMode = useRef(mode);
+  const isInitializedRef = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -72,8 +73,14 @@ export function MarkdownEditor({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const md = (editor.storage as any).markdown.getMarkdown();
       onChange(md);
+      // Mark initialized after a tick to skip any onUpdate that fires during setup
+      requestAnimationFrame(() => {
+        isInitializedRef.current = true;
+      });
     },
     onUpdate: ({ editor }) => {
+      // Skip onUpdate calls during TipTap initialization (normalization)
+      if (!isInitializedRef.current) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const md = (editor.storage as any).markdown.getMarkdown();
       (onUserEdit ?? onChange)(md);
