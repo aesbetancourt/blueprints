@@ -229,14 +229,14 @@ export function FileExplorer({
     });
     if (!confirmed) return;
 
-    const errors: string[] = [];
-    for (const filePath of selectedPaths) {
-      try {
-        await VaultService.deleteFile(filePath);
+    const paths = Array.from(selectedPaths);
+    const errors = await VaultService.deleteFiles(paths);
+
+    // Close tabs for successfully deleted files
+    const errorPaths = new Set(errors.map((e) => e.split(':')[0]));
+    for (const filePath of paths) {
+      if (!errorPaths.has(filePath)) {
         closeTab(filePath);
-      } catch (err) {
-        const fileName = filePath.split('/').pop() ?? filePath;
-        errors.push(`Failed to delete "${fileName}": ${err}`);
       }
     }
 

@@ -163,6 +163,26 @@ pub async fn delete_file(path: String, state: tauri::State<'_, crate::AppState>)
 }
 
 #[command]
+pub async fn delete_files(paths: Vec<String>, state: tauri::State<'_, crate::AppState>) -> Result<Vec<String>, String> {
+    let vault_root = get_vault_root(&state)?;
+    let mut errors: Vec<String> = Vec::new();
+    for path in &paths {
+        if let Err(e) = validate_path(path, &vault_root) {
+            errors.push(format!("{}: {}", path, e));
+            continue;
+        }
+        if let Err(e) = trash::delete(path) {
+            let name = std::path::Path::new(path)
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| path.clone());
+            errors.push(format!("Failed to delete \"{}\": {}", name, e));
+        }
+    }
+    Ok(errors)
+}
+
+#[command]
 pub async fn rename_file(old_path: String, new_path: String, state: tauri::State<'_, crate::AppState>) -> Result<(), String> {
     let vault_root = get_vault_root(&state)?;
     validate_path(&old_path, &vault_root)?;

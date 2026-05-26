@@ -52,6 +52,7 @@ pub fn run() {
             commands::files::move_file,
             commands::files::count_files_in_dir,
             commands::files::delete_file,
+            commands::files::delete_files,
             commands::files::rename_file,
             commands::files::search_files,
             commands::files::scan_tags,

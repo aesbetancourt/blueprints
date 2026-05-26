@@ -85,6 +85,11 @@ export const VaultService = {
     return invoke('delete_file', { path });
   },
 
+  async deleteFiles(paths: string[]): Promise<string[]> {
+    for (const p of paths) this._cache.delete(p);
+    return invoke<string[]>('delete_files', { paths });
+  },
+
   async renameFile(oldPath: string, newPath: string): Promise<void> {
     this._cache.delete(oldPath);
     this._cache.delete(newPath);
