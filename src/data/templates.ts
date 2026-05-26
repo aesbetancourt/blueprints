@@ -1,4 +1,4 @@
-export type TemplateCategory = 'basics' | 'documents' | 'diagrams' | 'data';
+export type TemplateCategory = 'basics' | 'documents' | 'diagrams' | 'data' | 'journal';
 
 export interface Template {
   id: string;
@@ -257,5 +257,47 @@ export const templates: Template[] = [
       '{\n  "status": "success",\n  "data": {\n    "users": [\n      {\n        "id": 1,\n        "name": "Example User",\n        "email": "user@example.com",\n        "roles": ["admin", "editor"]\n      }\n    ],\n    "pagination": {\n      "page": 1,\n      "perPage": 20,\n      "total": 1\n    }\n  }\n}',
     icon: 'json',
     suggestedName: 'api-response-',
+  },
+
+  // --- Journal ---
+  {
+    id: 'md-daily',
+    label: 'Daily Standup',
+    description: 'Quick daily note with yesterday, today, and blockers',
+    fileType: 'md',
+    category: 'journal',
+    content: `---\ntags: [daily]\n---\n\n# {{today:dddd, MMMM D}}\n\n## Yesterday\n\n- \n\n## Today\n\n- \n\n## Blockers\n\n- \n`,
+    icon: 'calendar',
+    suggestedName: '{{today}}-daily',
+  },
+  {
+    id: 'md-weekly',
+    label: 'Weekly Review',
+    description: 'End-of-week summary with wins, learnings, and next week plan',
+    fileType: 'md',
+    category: 'journal',
+    content: `---\ntags: [weekly]\n---\n\n# Week of {{today}}\n\n## Shipped\n\n- \n\n## In Progress\n\n- \n\n## Learnings\n\n- \n\n## Next Week\n\n- \n`,
+    icon: 'calendarRange',
+    suggestedName: '{{today}}-weekly',
+  },
+  {
+    id: 'md-devlog',
+    label: 'Dev Log',
+    description: 'Free-form engineering log entry for decisions and progress',
+    fileType: 'md',
+    category: 'journal',
+    content: `---\ntags: [devlog]\n---\n\n# Dev Log — {{today}}\n\n## Context\n\nWhat are you working on?\n\n## Progress\n\n- \n\n## Decisions Made\n\n| Decision | Rationale |\n|----------|----------|\n| | |\n\n## Open Questions\n\n- \n`,
+    icon: 'terminal',
+    suggestedName: '{{today}}-devlog',
+  },
+  {
+    id: 'md-til',
+    label: 'TIL (Today I Learned)',
+    description: 'Quick note capturing something you learned today',
+    fileType: 'md',
+    category: 'journal',
+    content: `---\ntags: [til]\n---\n\n# TIL: [Topic]\n\n**Date:** {{today}}\n\n## What\n\n\n\n## Why It Matters\n\n\n\n## References\n\n- \n`,
+    icon: 'lightbulb',
+    suggestedName: '{{today}}-til',
   },
 ];

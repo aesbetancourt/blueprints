@@ -32,6 +32,10 @@ import {
   Table,
   GanttChart,
   PieChart,
+  Calendar,
+  CalendarRange,
+  Terminal,
+  Lightbulb,
 } from 'lucide-react';
 
 interface CreateModalProps {
@@ -261,6 +265,7 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
                   { id: 'documents', label: 'Documents' },
                   { id: 'diagrams', label: 'Diagrams' },
                   { id: 'data', label: 'Data' },
+                  { id: 'journal', label: 'Journal' },
                 ] as const
               ).map((cat) => (
                 <button
@@ -654,6 +659,14 @@ function TemplateIconSvg({ icon, color }: { icon: string; color: string }) {
       return <PenTool {...iconProps} />;
     case 'json':
       return <Braces {...iconProps} />;
+    case 'calendar':
+      return <Calendar {...iconProps} />;
+    case 'calendarRange':
+      return <CalendarRange {...iconProps} />;
+    case 'terminal':
+      return <Terminal {...iconProps} />;
+    case 'lightbulb':
+      return <Lightbulb {...iconProps} />;
     default:
       return <File {...iconProps} />;
   }
