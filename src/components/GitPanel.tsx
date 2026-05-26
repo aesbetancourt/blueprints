@@ -247,10 +247,12 @@ function ChangesView({
             </button>
           </div>
           <div className="flex-1 overflow-auto px-3 py-2 font-mono text-xs leading-relaxed bg-surface-0">
-            {selectedDiff ? (
-              <DiffView diff={selectedDiff} />
-            ) : (
+            {selectedDiff === null ? (
               <span className="text-muted">Loading diff...</span>
+            ) : selectedDiff === '' ? (
+              <span className="text-muted">New file — no previous version to compare</span>
+            ) : (
+              <DiffView diff={selectedDiff} />
             )}
           </div>
         </div>

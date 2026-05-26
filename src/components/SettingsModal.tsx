@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { useSettingsStore } from '../store/settings';
+import { BUILT_IN_VARIABLES } from '../utils/resolveVariables';
 
 interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-type SettingsTab = 'editor' | 'file' | 'token' | 'notes' | 'shortcuts';
+type SettingsTab = 'editor' | 'file' | 'token' | 'notes' | 'variables' | 'shortcuts';
 
 const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'editor', label: 'Editor' },
   { id: 'file', label: 'Files' },
   { id: 'token', label: 'Tokens' },
   { id: 'notes', label: 'Notes' },
+  { id: 'variables', label: 'Variables' },
   { id: 'shortcuts', label: 'Shortcuts' },
 ];
 
@@ -75,6 +77,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           {activeTab === 'file' && <FileSection />}
           {activeTab === 'token' && <TokenSection />}
           {activeTab === 'notes' && <NotesSection />}
+          {activeTab === 'variables' && <VariablesSection />}
           {activeTab === 'shortcuts' && <ShortcutsSection />}
         </div>
 
@@ -332,6 +335,138 @@ function resolveNoteTemplate(template: string): string {
     .replace(/\{time\}/g, time)
     .replace(/\{timestamp\}/g, timestamp)
     .replace(/\{iso\}/g, iso);
+}
+
+// --- Variables Section ---
+
+function VariablesSection() {
+  const { variables, setVariable, removeVariable } = useSettingsStore();
+  const [newKey, setNewKey] = useState('');
+  const [newValue, setNewValue] = useState('');
+
+  const handleAdd = () => {
+    const key = newKey
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '');
+    if (!key) return;
+    setVariable(key, newValue);
+    setNewKey('');
+    setNewValue('');
+  };
+
+  const userVarEntries = Object.entries(variables);
+
+  return (
+    <div className="space-y-5">
+      {/* Built-in variables (read-only) */}
+      <div>
+        <h4 className="text-xs font-medium text-primary mb-2">Built-in Variables</h4>
+        <div className="rounded-lg bg-surface-2/50 border border-default p-3 space-y-1.5">
+          {BUILT_IN_VARIABLES.map((v) => (
+            <div key={v.key} className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <code className="text-xs text-accent">{`{{${v.key}}}`}</code>
+                <span className="text-xs text-muted">{v.description}</span>
+              </div>
+              <span className="text-xs text-secondary font-mono">{v.resolve()}</span>
+            </div>
+          ))}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <code className="text-xs text-accent">{`{{today:FORMAT}}`}</code>
+              <span className="text-xs text-muted">Custom date format</span>
+            </div>
+            <span className="text-xs text-secondary font-mono">e.g. MMM D, YYYY</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <code className="text-xs text-accent">{`{{now:FORMAT}}`}</code>
+              <span className="text-xs text-muted">Custom datetime format</span>
+            </div>
+            <span className="text-xs text-secondary font-mono">e.g. HH:mm:ss</span>
+          </div>
+          <p className="text-xs text-muted pt-1.5 border-t border-default/50">
+            Format tokens: YYYY, MM, MMM, DD, D, HH, mm, ss
+          </p>
+        </div>
+      </div>
+
+      {/* User-defined variables */}
+      <div>
+        <h4 className="text-xs font-medium text-primary mb-2">Custom Variables</h4>
+        <p className="text-xs text-muted mb-3">
+          Define your own variables. Type <code className="text-secondary">{'{{'}</code> in the
+          editor to insert a resolved value.
+        </p>
+
+        {userVarEntries.length > 0 && (
+          <div className="space-y-1.5 mb-3">
+            {userVarEntries.map(([key, value]) => (
+              <div key={key} className="flex items-center gap-2">
+                <code className="text-xs text-accent min-w-[80px]">{key}</code>
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => setVariable(key, e.target.value)}
+                  placeholder="Value..."
+                  className="settings-input flex-1 text-xs"
+                />
+                <button
+                  onClick={() => removeVariable(key)}
+                  className="p-1 rounded text-muted hover:text-error hover:bg-surface-2 transition-colors"
+                  title="Remove variable"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add new variable */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAdd();
+          }}
+          className="flex items-center gap-2"
+        >
+          <input
+            type="text"
+            value={newKey}
+            onChange={(e) => setNewKey(e.target.value)}
+            placeholder="key"
+            className="settings-input w-24 text-xs"
+          />
+          <input
+            type="text"
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            placeholder="value"
+            className="settings-input flex-1 text-xs"
+          />
+          <button
+            type="submit"
+            disabled={!newKey.trim()}
+            className="p-1.5 rounded bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            title="Add variable"
+          >
+            <Plus size={12} />
+          </button>
+        </form>
+      </div>
+
+      {/* Preview */}
+      <div className="rounded-lg bg-surface-2/50 border border-default p-3">
+        <p className="text-xs text-muted leading-relaxed">
+          Variables are resolved <strong className="text-secondary">at insertion time</strong>. When
+          you select a variable from the <code className="text-secondary">{'{{'}</code> popup or
+          create a file from a template, the value is stamped permanently into the document.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 // --- Shortcuts Section ---

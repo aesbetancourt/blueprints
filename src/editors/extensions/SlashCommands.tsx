@@ -1,7 +1,7 @@
 import { ReactRenderer } from '@tiptap/react';
 import { Extension } from '@tiptap/core';
 import Suggestion, { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
-import { forwardRef, useEffect, useImperativeHandle, useState, useCallback } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, useCallback } from 'react';
 import tippy from 'tippy.js';
 import type { Instance as TippyInstance } from 'tippy.js';
 import type { Editor, Range } from '@tiptap/core';
@@ -114,10 +114,20 @@ interface SlashCommandListRef {
 const SlashCommandList = forwardRef<SlashCommandListRef, SlashCommandListProps>(
   ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       setSelectedIndex(0);
     }, [items]);
+
+    useEffect(() => {
+      const container = scrollRef.current;
+      if (!container) return;
+      const selected = container.querySelector(`[data-index="${selectedIndex}"]`);
+      if (selected) {
+        selected.scrollIntoView({ block: 'nearest' });
+      }
+    }, [selectedIndex]);
 
     const selectItem = useCallback(
       (index: number) => {
@@ -154,13 +164,17 @@ const SlashCommandList = forwardRef<SlashCommandListRef, SlashCommandListProps>(
     }
 
     return (
-      <div className="bg-surface-1 border border-default rounded-lg overflow-hidden shadow-xl max-h-72 overflow-y-auto w-56">
+      <div
+        ref={scrollRef}
+        className="bg-surface-1 border border-default rounded-lg overflow-hidden shadow-xl max-h-72 overflow-y-auto w-56"
+      >
         <div className="px-2 py-1.5 text-[10px] font-medium text-muted uppercase tracking-wide border-b border-default">
           Commands
         </div>
         {items.map((item, index) => (
           <button
             key={item.title}
+            data-index={index}
             onClick={() => selectItem(index)}
             className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
               index === selectedIndex

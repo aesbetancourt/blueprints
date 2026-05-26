@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { templates, type Template, type TemplateCategory } from '../data/templates';
 import { useWorkspaceStore, type FileEntry } from '../store/workspace';
+import { useSettingsStore } from '../store/settings';
 import { VaultService } from '../services/vault';
 import { mapFileEntries } from '../utils/mapFileEntries';
+import { resolveVariables } from '../utils/resolveVariables';
 import { useToastStore } from './Toast';
 import {
   Search,
@@ -183,7 +185,9 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
       }
       const createdPath = await VaultService.createFile(fullPath, selectedTemplate.fileType);
       if (selectedTemplate.content) {
-        await VaultService.writeFile(createdPath, selectedTemplate.content);
+        const userVars = useSettingsStore.getState().variables;
+        const resolved = resolveVariables(selectedTemplate.content, userVars);
+        await VaultService.writeFile(createdPath, resolved);
       }
       const tree = await VaultService.listFiles(vaultPath);
       setFileTree(mapFileEntries(tree));

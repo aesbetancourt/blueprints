@@ -284,6 +284,24 @@ function HelpContent({ section }: { section: Section }) {
               description="Press ⌘S to save the current file immediately."
             />
           </HelpGroup>
+          <HelpGroup title="Variables">
+            <HelpItem
+              label="Insert a variable"
+              description="Type {{ in the editor to open the variable picker. Select a variable to insert its resolved value."
+            />
+            <HelpItem
+              label="Built-in variables"
+              description="{{today}} (date), {{now}} (datetime), {{time}} (HH:mm), {{year}}. Supports custom formats like {{today:MMM D, YYYY}}."
+            />
+            <HelpItem
+              label="Custom variables"
+              description="Define your own key-value pairs in Settings → Variables. They appear in the {{ popup alongside built-ins."
+            />
+            <HelpItem
+              label="Templates"
+              description="Variables in templates (e.g. {{today}}, {{author}}) are resolved automatically when a file is created."
+            />
+          </HelpGroup>
         </>
       );
 

@@ -18,6 +18,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorView } from '@codemirror/view';
 import { WikiLink } from './extensions/WikiLink';
 import { WikiLinkSuggestion } from './extensions/WikiLinkSuggestion';
+import { VariableSuggestion } from './extensions/VariableSuggestion';
 import { SlashCommands } from './extensions/SlashCommands';
 import { MermaidCodeBlock } from './extensions/MermaidBlock';
 import { useWorkspaceStore } from '../store/workspace';
@@ -93,6 +94,7 @@ export function MarkdownEditor({
       Markdown.configure({ html: false }),
       WikiLink,
       WikiLinkSuggestion,
+      VariableSuggestion,
       SlashCommands,
     ],
     content,

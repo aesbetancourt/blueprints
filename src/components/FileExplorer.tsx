@@ -687,7 +687,7 @@ function hasVisibleDescendants(
   hiddenPaths: string[],
   showHidden: boolean,
 ): boolean {
-  if (!node.children) return false;
+  if (!node.children || node.children.length === 0) return true;
   return node.children.some((child) => {
     if (!showHidden && hiddenPaths.includes(child.name)) return false;
     if (child.isDirectory) return hasVisibleDescendants(child, patterns, hiddenPaths, showHidden);
@@ -1127,16 +1127,13 @@ export function MoveToModal({
   const { quickNote } = useSettingsStore();
   const [customFolder, setCustomFolder] = useState('');
 
-  // Preset PARA folders + inbox folder from settings
+  // Preset folders: inbox from settings + archive
   const presets = [
-    { label: 'Projects', folder: 'projects' },
-    { label: 'Areas', folder: 'areas' },
-    { label: 'Resources', folder: 'resources' },
-    { label: 'Archive', folder: '_archive' },
     { label: 'Inbox', folder: quickNote.folder || 'inbox' },
+    { label: 'Archive', folder: '_archive' },
   ];
 
-  // Also collect existing top-level directories
+  // Collect existing top-level directories
   const existingDirs = fileTree
     .filter((f) => f.isDirectory)
     .map((f) => f.name)

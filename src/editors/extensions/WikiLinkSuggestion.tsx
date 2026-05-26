@@ -1,10 +1,11 @@
 import { ReactRenderer } from '@tiptap/react';
 import { Extension } from '@tiptap/core';
 import Suggestion, { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion';
-import { forwardRef, useEffect, useImperativeHandle, useState, useCallback } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, useCallback } from 'react';
 import tippy from 'tippy.js';
 import type { Instance as TippyInstance } from 'tippy.js';
 import { PluginKey } from '@tiptap/pm/state';
+import { FileText, Pencil, GitBranch, Braces, File } from 'lucide-react';
 import { useWorkspaceStore, FileEntry } from '../../store/workspace';
 
 interface SuggestionItem {
@@ -27,6 +28,16 @@ function flattenFiles(entries: FileEntry[]): SuggestionItem[] {
   return result;
 }
 
+function FileIcon({ name }: { name: string }) {
+  const ext = name.split('.').pop()?.toLowerCase();
+  const props = { size: 14, className: 'text-muted' };
+  if (ext === 'md') return <FileText {...props} />;
+  if (ext === 'excalidraw') return <Pencil {...props} />;
+  if (ext === 'mermaid') return <GitBranch {...props} />;
+  if (ext === 'json') return <Braces {...props} />;
+  return <File {...props} />;
+}
+
 interface SuggestionListProps {
   items: SuggestionItem[];
   command: (item: SuggestionItem) => void;
@@ -39,10 +50,20 @@ interface SuggestionListRef {
 const SuggestionList = forwardRef<SuggestionListRef, SuggestionListProps>(
   ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       setSelectedIndex(0);
     }, [items]);
+
+    useEffect(() => {
+      const container = scrollRef.current;
+      if (!container) return;
+      const selected = container.querySelector(`[data-index="${selectedIndex}"]`);
+      if (selected) {
+        selected.scrollIntoView({ block: 'nearest' });
+      }
+    }, [selectedIndex]);
 
     const selectItem = useCallback(
       (index: number) => {
@@ -72,25 +93,35 @@ const SuggestionList = forwardRef<SuggestionListRef, SuggestionListProps>(
 
     if (!items.length) {
       return (
-        <div className="bg-neutral-800 border border-neutral-700 rounded-lg p-2 text-neutral-400 text-sm">
-          No results
+        <div className="bg-surface-1 border border-default rounded-lg p-3 text-muted text-sm shadow-xl">
+          No matching files
         </div>
       );
     }
 
     return (
-      <div className="bg-neutral-800 border border-neutral-700 rounded-lg overflow-hidden shadow-xl max-h-60 overflow-y-auto">
+      <div
+        ref={scrollRef}
+        className="bg-surface-1 border border-default rounded-lg overflow-hidden shadow-xl max-h-72 overflow-y-auto w-72"
+      >
+        <div className="px-2 py-1.5 text-[10px] font-medium text-muted uppercase tracking-wide border-b border-default">
+          Links
+        </div>
         {items.map((item, index) => (
           <button
             key={item.path}
+            data-index={index}
             onClick={() => selectItem(index)}
-            className={`block w-full text-left px-3 py-1.5 text-sm ${
+            className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm transition-colors ${
               index === selectedIndex
-                ? 'bg-blue-600 text-white'
-                : 'text-neutral-200 hover:bg-neutral-700'
+                ? 'bg-accent/15 text-primary'
+                : 'text-secondary hover:bg-surface-2'
             }`}
           >
-            {item.name}
+            <span className="w-7 h-7 rounded-md bg-surface-2 border border-default flex items-center justify-center shrink-0">
+              <FileIcon name={item.name} />
+            </span>
+            <span className="text-sm font-medium truncate">{item.name}</span>
           </button>
         ))}
       </div>

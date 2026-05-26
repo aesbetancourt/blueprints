@@ -45,6 +45,7 @@ export interface SettingsState {
   shortcuts: ShortcutBinding[];
   tags: FileTag[];
   fileTags: Record<string, string[]>; // path -> tag ids
+  variables: Record<string, string>; // user-defined template variables
 
   updateEditor: (partial: Partial<EditorSettings>) => void;
   updateFile: (partial: Partial<FileSettings>) => void;
@@ -55,6 +56,8 @@ export interface SettingsState {
   removeTag: (id: string) => void;
   assignTag: (path: string, tagId: string) => void;
   unassignTag: (path: string, tagId: string) => void;
+  setVariable: (key: string, value: string) => void;
+  removeVariable: (key: string) => void;
   resetAll: () => void;
 }
 
@@ -102,6 +105,11 @@ const DEFAULT_TAGS: FileTag[] = [
   { id: 'blocked', label: 'Blocked', color: '#ec4899' },
 ];
 
+const DEFAULT_VARIABLES: Record<string, string> = {
+  author: '',
+  project: '',
+};
+
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
@@ -112,6 +120,7 @@ export const useSettingsStore = create<SettingsState>()(
       shortcuts: DEFAULT_SHORTCUTS,
       tags: DEFAULT_TAGS,
       fileTags: {},
+      variables: DEFAULT_VARIABLES,
 
       updateEditor: (partial) => set((s) => ({ editor: { ...s.editor, ...partial } })),
 
@@ -160,6 +169,13 @@ export const useSettingsStore = create<SettingsState>()(
           return { fileTags: { ...s.fileTags, [path]: updated } };
         }),
 
+      setVariable: (key, value) => set((s) => ({ variables: { ...s.variables, [key]: value } })),
+
+      removeVariable: (key) =>
+        set((s) => ({
+          variables: Object.fromEntries(Object.entries(s.variables).filter(([k]) => k !== key)),
+        })),
+
       resetAll: () =>
         set({
           editor: DEFAULT_EDITOR,
@@ -169,6 +185,7 @@ export const useSettingsStore = create<SettingsState>()(
           shortcuts: DEFAULT_SHORTCUTS,
           tags: DEFAULT_TAGS,
           fileTags: {},
+          variables: DEFAULT_VARIABLES,
         }),
     }),
     {
@@ -183,6 +200,7 @@ export const useSettingsStore = create<SettingsState>()(
           file: { ...current.file, ...state.file },
           token: { ...current.token, ...state.token },
           quickNote: { ...current.quickNote, ...state.quickNote },
+          variables: { ...current.variables, ...state.variables },
         };
         // Migrate: ensure *.json is in includePatterns for existing users
         if (merged.file.includePatterns && !merged.file.includePatterns.includes('*.json')) {
