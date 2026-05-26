@@ -11,6 +11,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Markdown } from 'tiptap-markdown';
+import { HighlightMark } from './extensions/HighlightMark';
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
@@ -86,6 +87,7 @@ export function MarkdownEditor({
       TableHeader,
       TaskList,
       TaskItem.configure({ nested: true }),
+      HighlightMark.configure({ multicolor: true }),
       Placeholder.configure({
         placeholder: 'Start writing...',
         showOnlyCurrent: false,

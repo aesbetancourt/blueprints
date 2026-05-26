@@ -5,6 +5,7 @@ import {
   Italic,
   Strikethrough,
   Code,
+  Highlighter,
   List,
   ListOrdered,
   ListChecks,
@@ -16,6 +17,15 @@ import {
   Undo,
   Redo,
 } from 'lucide-react';
+
+const HIGHLIGHT_COLORS = [
+  { color: '#854d0e', label: 'Yellow' },
+  { color: '#166534', label: 'Green' },
+  { color: '#1e40af', label: 'Blue' },
+  { color: '#991b1b', label: 'Red' },
+  { color: '#5b21b6', label: 'Purple' },
+  { color: '#9a3412', label: 'Orange' },
+];
 
 interface MarkdownToolbarProps {
   editor: Editor | null;
@@ -114,6 +124,7 @@ export function MarkdownToolbar({ editor }: MarkdownToolbarProps) {
         >
           <Code size={15} />
         </ToolbarButton>
+        <HighlightButton editor={editor} />
       </ToolbarGroup>
 
       <Divider />
@@ -283,5 +294,58 @@ function ToolbarButton({
     >
       {children}
     </button>
+  );
+}
+
+function HighlightButton({ editor }: { editor: Editor }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const isActive = editor.isActive('highlight');
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => {
+          if (isActive) {
+            editor.chain().focus().unsetHighlight().run();
+          } else {
+            setOpen((o) => !o);
+          }
+        }}
+        title="Highlight"
+        className={`${btnBase} ${isActive ? btnActive : btnIdle}`}
+      >
+        <Highlighter size={15} />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-surface-1 border border-default rounded-lg shadow-xl p-1.5 flex gap-1">
+          {HIGHLIGHT_COLORS.map((h) => (
+            <button
+              key={h.color}
+              onClick={() => {
+                editor.chain().focus().setHighlight({ color: h.color }).run();
+                setOpen(false);
+              }}
+              title={h.label}
+              className="w-5 h-5 rounded-full border border-default hover:scale-125 transition-transform"
+              style={{ backgroundColor: h.color }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
