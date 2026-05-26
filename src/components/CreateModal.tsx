@@ -36,6 +36,9 @@ import {
   CalendarRange,
   Terminal,
   Lightbulb,
+  FileCode,
+  FileSpreadsheet,
+  Code2,
 } from 'lucide-react';
 
 interface CreateModalProps {
@@ -50,6 +53,9 @@ const TYPE_COLORS: Record<string, string> = {
   mermaid: 'var(--color-success)',
   excalidraw: 'var(--color-warning)',
   json: '#a78bfa',
+  yaml: '#f472b6',
+  xml: '#fb923c',
+  csv: '#34d399',
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -172,6 +178,9 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
     excalidraw: '.excalidraw',
     mermaid: '.mermaid',
     json: '.json',
+    yaml: '.yaml',
+    xml: '.xml',
+    csv: '.csv',
   };
 
   const handleCreate = useCallback(async () => {
@@ -667,6 +676,12 @@ function TemplateIconSvg({ icon, color }: { icon: string; color: string }) {
       return <Terminal {...iconProps} />;
     case 'lightbulb':
       return <Lightbulb {...iconProps} />;
+    case 'yaml':
+      return <FileCode {...iconProps} />;
+    case 'xml':
+      return <Code2 {...iconProps} />;
+    case 'csv':
+      return <FileSpreadsheet {...iconProps} />;
     default:
       return <File {...iconProps} />;
   }

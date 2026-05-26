@@ -4,7 +4,7 @@ export interface Template {
   id: string;
   label: string;
   description: string;
-  fileType: 'md' | 'excalidraw' | 'mermaid' | 'json';
+  fileType: 'md' | 'excalidraw' | 'mermaid' | 'json' | 'yaml' | 'xml' | 'csv';
   category: TemplateCategory;
   content: string;
   icon: string;
@@ -257,6 +257,67 @@ export const templates: Template[] = [
       '{\n  "status": "success",\n  "data": {\n    "users": [\n      {\n        "id": 1,\n        "name": "Example User",\n        "email": "user@example.com",\n        "roles": ["admin", "editor"]\n      }\n    ],\n    "pagination": {\n      "page": 1,\n      "perPage": 20,\n      "total": 1\n    }\n  }\n}',
     icon: 'json',
     suggestedName: 'api-response-',
+  },
+  {
+    id: 'yaml-blank',
+    label: 'YAML Document',
+    description: 'Empty YAML file with graph visualization',
+    fileType: 'yaml',
+    category: 'data',
+    content: '# Document\n\n',
+    icon: 'yaml',
+    suggestedName: 'config-',
+  },
+  {
+    id: 'yaml-config',
+    label: 'App Config',
+    description: 'Application configuration with common settings',
+    fileType: 'yaml',
+    category: 'data',
+    content: `app:\n  name: my-app\n  version: 1.0.0\n  port: 3000\n\ndatabase:\n  host: localhost\n  port: 5432\n  name: mydb\n  pool:\n    min: 2\n    max: 10\n\nlogging:\n  level: info\n  format: json\n\nfeatures:\n  - name: dark-mode\n    enabled: true\n  - name: beta-dashboard\n    enabled: false\n`,
+    icon: 'yaml',
+    suggestedName: 'config-',
+  },
+  {
+    id: 'xml-blank',
+    label: 'XML Document',
+    description: 'Empty XML file with graph visualization',
+    fileType: 'xml',
+    category: 'data',
+    content: '<?xml version="1.0" encoding="UTF-8"?>\n<root>\n  \n</root>\n',
+    icon: 'xml',
+    suggestedName: 'document-',
+  },
+  {
+    id: 'xml-config',
+    label: 'XML Config',
+    description: 'Structured XML configuration file',
+    fileType: 'xml',
+    category: 'data',
+    content: `<?xml version="1.0" encoding="UTF-8"?>\n<configuration>\n  <appSettings>\n    <add key="AppName" value="MyApp" />\n    <add key="Version" value="1.0.0" />\n    <add key="Environment" value="development" />\n  </appSettings>\n  <connectionStrings>\n    <add name="Default" connectionString="Server=localhost;Database=mydb;" />\n  </connectionStrings>\n  <logging>\n    <level value="INFO" />\n    <appender type="Console" />\n  </logging>\n</configuration>\n`,
+    icon: 'xml',
+    suggestedName: 'config-',
+  },
+  {
+    id: 'csv-blank',
+    label: 'CSV Table',
+    description: 'Empty CSV file with tabular data visualization',
+    fileType: 'csv',
+    category: 'data',
+    content: 'column1,column2,column3\n',
+    icon: 'csv',
+    suggestedName: 'data-',
+  },
+  {
+    id: 'csv-sample',
+    label: 'CSV Dataset',
+    description: 'Sample dataset with headers and rows',
+    fileType: 'csv',
+    category: 'data',
+    content:
+      'id,name,email,role,active\n1,Alice,alice@example.com,admin,true\n2,Bob,bob@example.com,editor,true\n3,Charlie,charlie@example.com,viewer,false\n',
+    icon: 'csv',
+    suggestedName: 'dataset-',
   },
 
   // --- Journal ---

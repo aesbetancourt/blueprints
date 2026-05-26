@@ -32,6 +32,10 @@ export function GitPanel() {
     '*.excalidraw',
     '*.mermaid',
     '*.json',
+    '*.yaml',
+    '*.yml',
+    '*.xml',
+    '*.csv',
   ];
   const [commitMsg, setCommitMsg] = useState('');
   const [view, setView] = useState<'changes' | 'log'>('changes');

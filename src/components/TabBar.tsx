@@ -1,5 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Pencil, Network, Braces, File, X, PanelLeftOpen } from 'lucide-react';
+import {
+  FileText,
+  Pencil,
+  Network,
+  Braces,
+  File,
+  X,
+  PanelLeftOpen,
+  FileCode,
+  Code2,
+  FileSpreadsheet,
+} from 'lucide-react';
 import { useWorkspaceStore, type Tab } from '../store/workspace';
 import { confirm } from './ConfirmDialog';
 
@@ -13,6 +24,12 @@ function TabIcon({ fileType }: { fileType: string }) {
       return <Network size={12} className="shrink-0" style={{ color: 'var(--color-success)' }} />;
     case 'json':
       return <Braces size={12} className="shrink-0" style={{ color: '#a78bfa' }} />;
+    case 'yaml':
+      return <FileCode size={12} className="shrink-0" style={{ color: '#f472b6' }} />;
+    case 'xml':
+      return <Code2 size={12} className="shrink-0" style={{ color: '#fb923c' }} />;
+    case 'csv':
+      return <FileSpreadsheet size={12} className="shrink-0" style={{ color: '#34d399' }} />;
     default:
       return <File size={12} className="shrink-0" style={{ color: 'var(--color-text-muted)' }} />;
   }

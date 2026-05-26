@@ -11,8 +11,11 @@ import {
 import type { ReactNode } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
+import { yaml } from '@codemirror/lang-yaml';
+import { xml } from '@codemirror/lang-xml';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { EditorView } from '@codemirror/view';
+import { type DataFormat, toJson, isValid } from '../utils/dataFormatConverter';
 import 'jsoncrack-react/style.css';
 
 const JSONCrackLazy = lazy(() =>
@@ -42,27 +45,33 @@ interface JsonCrackEditorProps {
   content: string;
   onChange: (content: string) => void;
   showGraph?: boolean;
+  format?: DataFormat;
 }
 
 type LayoutDirection = 'RIGHT' | 'DOWN';
 
 const GRAPH_DEBOUNCE_MS = 500;
 
-export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCrackEditorProps) {
+const FORMAT_LABELS: Record<DataFormat, string> = {
+  json: 'JSON',
+  yaml: 'YAML',
+  xml: 'XML',
+  csv: 'CSV',
+};
+
+export function JsonCrackEditor({
+  content,
+  onChange,
+  showGraph = true,
+  format = 'json',
+}: JsonCrackEditorProps) {
   const [localContent, setLocalContent] = useState(content);
   const [graphJson, setGraphJson] = useState<string | null>(null);
   const [graphReady, setGraphReady] = useState(false);
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('RIGHT');
   const [dividerPos, setDividerPos] = useState(50);
   const [collapsedPane, setCollapsedPane] = useState<'none' | 'editor' | 'graph'>('none');
-  const [isJsonValid, setIsJsonValid] = useState(() => {
-    try {
-      JSON.parse(content);
-      return true;
-    } catch {
-      return false;
-    }
-  });
+  const [isContentValid, setIsContentValid] = useState(() => isValid(content, format));
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,11 +82,9 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
   useEffect(() => {
     if (!showGraph) return;
     const timer = setTimeout(() => {
-      try {
-        JSON.parse(content);
-        setGraphJson(content);
-      } catch {
-        // invalid JSON, no graph
+      const converted = toJson(content, format);
+      if (converted) {
+        setGraphJson(converted);
       }
       setGraphReady(true);
     }, 100);
@@ -85,18 +92,21 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
   }, []);
 
   // Update graph with debounce when content changes
-  const updateGraph = useCallback((text: string) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      try {
-        JSON.parse(text);
-        setGraphJson(text);
-        setIsJsonValid(true);
-      } catch {
-        setIsJsonValid(false);
-      }
-    }, GRAPH_DEBOUNCE_MS);
-  }, []);
+  const updateGraph = useCallback(
+    (text: string) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        const converted = toJson(text, format);
+        if (converted) {
+          setGraphJson(converted);
+          setIsContentValid(true);
+        } else {
+          setIsContentValid(false);
+        }
+      }, GRAPH_DEBOUNCE_MS);
+    },
+    [format],
+  );
 
   const handleEditorChange = useCallback(
     (value: string) => {
@@ -117,16 +127,17 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
       return;
     }
     setLocalContent(content);
-    try {
-      JSON.parse(content);
-      setGraphJson(content);
-      setIsJsonValid(true);
-    } catch {
-      setIsJsonValid(false);
+    const converted = toJson(content, format);
+    if (converted) {
+      setGraphJson(converted);
+      setIsContentValid(true);
+    } else {
+      setIsContentValid(false);
     }
-  }, [content]);
+  }, [content, format]);
 
   const handleBeautify = useCallback(() => {
+    if (format !== 'json') return;
     try {
       const parsed = JSON.parse(localContent);
       const beautified = JSON.stringify(parsed, null, 2);
@@ -134,13 +145,14 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
       setLocalContent(beautified);
       onChange(beautified);
       setGraphJson(beautified);
-      setIsJsonValid(true);
+      setIsContentValid(true);
     } catch {
       // no-op if invalid JSON
     }
-  }, [localContent, onChange]);
+  }, [localContent, onChange, format]);
 
   const handleMinify = useCallback(() => {
+    if (format !== 'json') return;
     try {
       const parsed = JSON.parse(localContent);
       const minified = JSON.stringify(parsed);
@@ -148,11 +160,11 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
       setLocalContent(minified);
       onChange(minified);
       setGraphJson(minified);
-      setIsJsonValid(true);
+      setIsContentValid(true);
     } catch {
       // no-op if invalid JSON
     }
-  }, [localContent, onChange]);
+  }, [localContent, onChange, format]);
 
   // Divider drag logic
   const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
@@ -176,7 +188,11 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
     document.addEventListener('mouseup', handleMouseUp);
   }, []);
 
-  const extensions = useMemo(() => [json(), oneDark, EditorView.lineWrapping], []);
+  const extensions = useMemo(() => {
+    const langExt =
+      format === 'yaml' ? yaml() : format === 'xml' ? xml() : format === 'csv' ? [] : json();
+    return [langExt, oneDark, EditorView.lineWrapping].flat();
+  }, [format]);
 
   const editorVisible = collapsedPane !== 'editor';
   const graphVisible = showGraph && collapsedPane !== 'graph';
@@ -185,22 +201,32 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
     <div className="h-full w-full flex flex-col bg-surface-0" style={{ minHeight: 0 }}>
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-default bg-surface-1 shrink-0">
-        <button
-          onClick={handleBeautify}
-          disabled={!isJsonValid}
-          className="px-2.5 py-1 text-xs font-medium rounded bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          title={isJsonValid ? 'Beautify JSON' : 'Fix JSON errors first'}
-        >
-          Beautify
-        </button>
-        <button
-          onClick={handleMinify}
-          disabled={!isJsonValid}
-          className="px-2.5 py-1 text-xs font-medium rounded bg-surface-2 text-secondary hover:bg-surface-3 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          title={isJsonValid ? 'Minify JSON' : 'Fix JSON errors first'}
-        >
-          Minify
-        </button>
+        {format === 'json' && (
+          <>
+            <button
+              onClick={handleBeautify}
+              disabled={!isContentValid}
+              className="px-2.5 py-1 text-xs font-medium rounded bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              title={isContentValid ? 'Beautify JSON' : 'Fix JSON errors first'}
+            >
+              Beautify
+            </button>
+            <button
+              onClick={handleMinify}
+              disabled={!isContentValid}
+              className="px-2.5 py-1 text-xs font-medium rounded bg-surface-2 text-secondary hover:bg-surface-3 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              title={isContentValid ? 'Minify JSON' : 'Fix JSON errors first'}
+            >
+              Minify
+            </button>
+          </>
+        )}
+
+        {format !== 'json' && (
+          <span className="px-2.5 py-1 text-xs font-medium text-secondary">
+            {FORMAT_LABELS[format]}
+          </span>
+        )}
 
         {showGraph && (
           <>
@@ -240,8 +266,10 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
 
         <div className="flex-1" />
 
-        {!isJsonValid && <span className="text-xs text-red-400 font-medium">Invalid JSON</span>}
-        {isJsonValid && <span className="text-xs text-green-400/70 font-medium">Valid</span>}
+        {!isContentValid && (
+          <span className="text-xs text-red-400 font-medium">Invalid {FORMAT_LABELS[format]}</span>
+        )}
+        {isContentValid && <span className="text-xs text-green-400/70 font-medium">Valid</span>}
       </div>
 
       {/* Editor + Graph split */}
@@ -324,7 +352,7 @@ export function JsonCrackEditor({ content, onChange, showGraph = true }: JsonCra
                       <div>
                         <p className="text-red-400 font-medium">Cannot render graph</p>
                         <p className="text-xs text-muted mt-1">
-                          Fix JSON syntax errors to see visualization
+                          Fix {FORMAT_LABELS[format]} syntax errors to see visualization
                         </p>
                       </div>
                     )}

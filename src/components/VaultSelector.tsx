@@ -119,6 +119,27 @@ export function VaultSelector() {
             />
             .json
           </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full opacity-60"
+              style={{ backgroundColor: '#f472b6' }}
+            />
+            .yaml
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full opacity-60"
+              style={{ backgroundColor: '#fb923c' }}
+            />
+            .xml
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full opacity-60"
+              style={{ backgroundColor: '#34d399' }}
+            />
+            .csv
+          </span>
         </div>
 
         <p className="text-muted text-xs mt-4">Plain files on disk. Git-friendly.</p>

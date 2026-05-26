@@ -7,6 +7,7 @@ import { MarkdownEditor } from '../editors/MarkdownEditor';
 import { ExcalidrawEditor } from '../editors/ExcalidrawEditor';
 import { MermaidEditor } from '../editors/MermaidEditor';
 import { JsonCrackEditor } from '../editors/JsonCrackEditor';
+import { detectFormat } from '../utils/dataFormatConverter';
 import { useToastStore } from './Toast';
 
 function computeStats(text: string, charsPerToken: number) {
@@ -269,10 +270,14 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
     case 'mermaid':
       editor = <MermaidEditor key={tab.filePath} content={content} onChange={handleUserEdit} />;
       break;
-    case 'json': {
+    case 'json':
+    case 'yaml':
+    case 'xml':
+    case 'csv': {
       const jsonGraphMaxSizeKB = useSettingsStore.getState().file.jsonGraphMaxSizeKB ?? 500;
       const fileSizeKB = content.length / 1024;
       const showGraph = forceGraph || fileSizeKB <= jsonGraphMaxSizeKB;
+      const dataFormat = detectFormat(tab.filePath);
       editor = (
         <div className="h-full w-full flex flex-col">
           {!showGraph && (
@@ -295,6 +300,7 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
               content={content}
               onChange={handleUserEdit}
               showGraph={showGraph}
+              format={dataFormat}
             />
           </div>
         </div>

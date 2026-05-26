@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { VaultService } from '../services/vault';
 
-export type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json';
+export type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json' | 'yaml' | 'xml' | 'csv';
 
 export interface Tab {
   id: string;
@@ -80,6 +80,9 @@ function getFileType(path: string): FileType {
   if (path.endsWith('.excalidraw')) return 'excalidraw';
   if (path.endsWith('.mermaid')) return 'mermaid';
   if (path.endsWith('.json')) return 'json';
+  if (path.endsWith('.yaml') || path.endsWith('.yml')) return 'yaml';
+  if (path.endsWith('.xml')) return 'xml';
+  if (path.endsWith('.csv')) return 'csv';
   return 'md';
 }
 
@@ -284,6 +287,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         foldersFirst: state.foldersFirst,
         pinnedFiles: state.pinnedFiles,
       }),
+      merge: (persisted, current) => {
+        const state = persisted as Partial<WorkspaceState> | undefined;
+        if (!state) return current;
+        const merged = { ...current, ...state };
+        // Re-derive fileType from filePath to pick up new format support
+        if (merged.openTabs) {
+          merged.openTabs = merged.openTabs.map((t) => ({
+            ...t,
+            fileType: getFileType(t.filePath),
+          }));
+        }
+        return merged;
+      },
     },
   ),
 );

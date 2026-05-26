@@ -102,6 +102,10 @@ export function FileExplorer({
     '*.excalidraw',
     '*.mermaid',
     '*.json',
+    '*.yaml',
+    '*.yml',
+    '*.xml',
+    '*.csv',
   ];
 
   // Filter out _archive folder unless toggled on, and hidden items unless revealed
@@ -1261,6 +1265,18 @@ function FileIcon({ ext }: { ext: string | undefined }) {
     case 'json':
       return (
         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#a78bfa' }} />
+      );
+    case 'yaml':
+      return (
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#f472b6' }} />
+      );
+    case 'xml':
+      return (
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#fb923c' }} />
+      );
+    case 'csv':
+      return (
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#34d399' }} />
       );
     default:
       return (

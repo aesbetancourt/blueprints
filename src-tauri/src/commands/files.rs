@@ -138,6 +138,9 @@ pub async fn create_file(path: String, file_type: String, state: tauri::State<'_
         "excalidraw" => "{\"type\":\"excalidraw\",\"version\":2,\"source\":\"blueprints\",\"elements\":[],\"appState\":{\"viewBackgroundColor\":\"#0f1117\"}}".to_string(),
         "mermaid" => "flowchart TD\n    Start --> End".to_string(),
         "json" => "{\n  \n}".to_string(),
+        "yaml" => String::new(),
+        "xml" => "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n  \n</root>\n".to_string(),
+        "csv" => String::new(),
         _ => String::new(),
     };
 
@@ -335,7 +338,7 @@ pub async fn search_files(query: String, state: tauri::State<'_, crate::AppState
                     search_dir(&path, query, results, max_results);
                 } else {
                     let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
-                    if !matches!(ext, "md" | "mermaid" | "excalidraw") {
+                    if !matches!(ext, "md" | "mermaid" | "excalidraw" | "json" | "yaml" | "yml" | "xml" | "csv") {
                         continue;
                     }
                     // Skip excalidraw JSON content search (too noisy)

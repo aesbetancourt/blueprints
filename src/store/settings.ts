@@ -71,7 +71,16 @@ const DEFAULT_EDITOR: EditorSettings = {
 
 const DEFAULT_FILE: FileSettings = {
   defaultFileType: 'md',
-  includePatterns: ['*.md', '*.excalidraw', '*.mermaid', '*.json'],
+  includePatterns: [
+    '*.md',
+    '*.excalidraw',
+    '*.mermaid',
+    '*.json',
+    '*.yaml',
+    '*.yml',
+    '*.xml',
+    '*.csv',
+  ],
   hiddenPaths: [],
   jsonGraphMaxSizeKB: 500,
 };
@@ -207,6 +216,15 @@ export const useSettingsStore = create<SettingsState>()(
           merged.file = {
             ...merged.file,
             includePatterns: [...merged.file.includePatterns, '*.json'],
+          };
+        }
+        // Migrate: ensure new data formats are in includePatterns for existing users
+        const newPatterns = ['*.yaml', '*.yml', '*.xml', '*.csv'];
+        const missing = newPatterns.filter((p) => !merged.file.includePatterns?.includes(p));
+        if (missing.length > 0 && merged.file.includePatterns) {
+          merged.file = {
+            ...merged.file,
+            includePatterns: [...merged.file.includePatterns, ...missing],
           };
         }
         return merged;
