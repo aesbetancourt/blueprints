@@ -25,11 +25,15 @@ function scrollToHeading(text: string, level: number) {
   }
 }
 
-export function TableOfContents() {
+export function TableOfContents({ forceExpanded }: { forceExpanded?: boolean }) {
   const { activeTabId, openTabs } = useWorkspaceStore();
   const activeTab = openTabs.find((t) => t.id === activeTabId);
   const [headings, setHeadings] = useState<TocHeading[]>([]);
   const [expanded, setExpanded] = useState(true);
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   useEffect(() => {
     if (!activeTab || activeTab.fileType !== 'md') {

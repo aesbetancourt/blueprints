@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRight, Pencil, X, Plus } from 'lucide-react';
 import { useAnnotationsStore, type Annotation } from '../store/annotations';
 import { useWorkspaceStore } from '../store/workspace';
 
-export function AnnotationsPanel() {
+export function AnnotationsPanel({ forceExpanded }: { forceExpanded?: boolean }) {
   const { openTabs, activeTabId } = useWorkspaceStore();
   const activeTab = openTabs.find((t) => t.id === activeTabId);
   const { annotations, addAnnotation, updateAnnotation, deleteAnnotation } = useAnnotationsStore();
@@ -13,6 +13,10 @@ export function AnnotationsPanel() {
   const [newColor, setNewColor] = useState<Annotation['color']>('yellow');
   const [editId, setEditId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState('');
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   if (!activeTab || activeTab.fileType !== 'md') return null;
 

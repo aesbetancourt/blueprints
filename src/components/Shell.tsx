@@ -53,9 +53,15 @@ export function Shell() {
 
   const createQuickNote = useCallback(async () => {
     if (!vaultPath) return;
+    const { quickNote } = useSettingsStore.getState();
+    const folder = quickNote.folder || 'scratch';
+    const confirmed = await confirm({
+      title: 'Create Quick Note',
+      message: `Create a new quick note in /${folder}?`,
+      confirmLabel: 'Create',
+    });
+    if (!confirmed) return;
     try {
-      const { quickNote } = useSettingsStore.getState();
-      const folder = quickNote.folder || 'scratch';
       const scratchDir = `${vaultPath}/${folder}`.replace(/\/+$/, '');
       // Ensure directory exists
       try {

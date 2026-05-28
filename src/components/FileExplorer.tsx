@@ -42,6 +42,16 @@ const MoveContext = createContext<MoveState>({
   exitSelectMode: () => {},
 });
 
+/** Signal context for bulk expand/collapse of all folders */
+export interface FolderExpandSignal {
+  /** Increments to trigger expand-all */
+  expandAll: number;
+  /** Increments to trigger collapse-all */
+  collapseAll: number;
+}
+
+const FolderExpandContext = createContext<FolderExpandSignal>({ expandAll: 0, collapseAll: 0 });
+
 interface FileContextMenuState {
   node: FileEntry;
   position: { x: number; y: number };
@@ -60,12 +70,14 @@ export function FileExplorer({
   isSelectMode,
   onEnterSelectMode,
   onExitSelectMode,
+  folderExpandSignal,
 }: {
   showArchive: boolean;
   showHidden: boolean;
   isSelectMode: boolean;
   onEnterSelectMode: () => void;
   onExitSelectMode: () => void;
+  folderExpandSignal?: FolderExpandSignal;
 }) {
   const { fileTree, vaultPath, sortMode, foldersFirst, recentFiles } = useWorkspaceStore();
   const { setFileTree, updateTabPath, openFile, closeTab } = useWorkspaceStore();
@@ -393,22 +405,24 @@ export function FileExplorer({
         </button>
       )}
 
-      <nav
-        className="text-sm select-none"
-        onContextMenu={(e) => {
-          if (vaultPath) handleBackgroundContextMenu(e, vaultPath);
-        }}
-      >
-        {filteredTree.map((node) => (
-          <TreeNode
-            key={node.path}
-            node={node}
-            depth={0}
-            onFileContextMenu={handleFileContextMenu}
-            showHidden={showHidden}
-          />
-        ))}
-      </nav>
+      <FolderExpandContext.Provider value={folderExpandSignal ?? { expandAll: 0, collapseAll: 0 }}>
+        <nav
+          className="text-sm select-none"
+          onContextMenu={(e) => {
+            if (vaultPath) handleBackgroundContextMenu(e, vaultPath);
+          }}
+        >
+          {filteredTree.map((node) => (
+            <TreeNode
+              key={node.path}
+              node={node}
+              depth={0}
+              onFileContextMenu={handleFileContextMenu}
+              showHidden={showHidden}
+            />
+          ))}
+        </nav>
+      </FolderExpandContext.Provider>
 
       {/* Create file context menu (right-click on background) */}
       {createMenu && (
@@ -761,7 +775,7 @@ function TreeNode({
   ) => void;
   showHidden: boolean;
 }) {
-  const [expanded, setExpanded] = useState(depth < 2);
+  const [expanded, setExpanded] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(node.name);
   const renameRef = useRef<HTMLInputElement>(null);
@@ -769,6 +783,7 @@ function TreeNode({
   const { addToast } = useToastStore();
   const { movingPaths, isSelectMode, selectedPaths, startMove, executeMove, toggleSelect } =
     useContext(MoveContext);
+  const folderSignal = useContext(FolderExpandContext);
   const { file: fileSettings, tags, fileTags } = useSettingsStore();
   const isHidden = (fileSettings.hiddenPaths ?? []).includes(node.name);
   const nodeTagIds = (fileTags ?? {})[node.path] ?? [];
@@ -782,6 +797,24 @@ function TreeNode({
   useEffect(() => {
     if (renaming) renameRef.current?.focus();
   }, [renaming]);
+
+  // React to bulk expand/collapse signals (only for directories, skip initial mount)
+  const mountedExpandRef = useRef(folderSignal.expandAll);
+  const mountedCollapseRef = useRef(folderSignal.collapseAll);
+
+  useEffect(() => {
+    if (folderSignal.expandAll !== mountedExpandRef.current && node.isDirectory) {
+      setExpanded(true);
+    }
+    mountedExpandRef.current = folderSignal.expandAll;
+  }, [folderSignal.expandAll, node.isDirectory]);
+
+  useEffect(() => {
+    if (folderSignal.collapseAll !== mountedCollapseRef.current && node.isDirectory) {
+      setExpanded(false);
+    }
+    mountedCollapseRef.current = folderSignal.collapseAll;
+  }, [folderSignal.collapseAll, node.isDirectory]);
 
   const refreshTree = async () => {
     if (!vaultPath) return;

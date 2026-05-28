@@ -30,9 +30,13 @@ function resolveLink(name: string, fileTree: FileEntry[]): string | null {
   return walk(fileTree);
 }
 
-export function OutgoingLinksPanel() {
+export function OutgoingLinksPanel({ forceExpanded }: { forceExpanded?: boolean }) {
   const [links, setLinks] = useState<OutgoingLink[]>([]);
   const [expanded, setExpanded] = useState(true);
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   const openFile = useWorkspaceStore((s) => s.openFile);
   const activeTabId = useWorkspaceStore((s) => s.activeTabId);

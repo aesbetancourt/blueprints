@@ -3,11 +3,15 @@ import { ChevronRight, Link2 } from 'lucide-react';
 import { VaultService, type BacklinkEntry } from '../services/vault';
 import { useWorkspaceStore } from '../store/workspace';
 
-export function BacklinksPanel() {
+export function BacklinksPanel({ forceExpanded }: { forceExpanded?: boolean }) {
   const [backlinks, setBacklinks] = useState<BacklinkEntry[]>([]);
   const [expanded, setExpanded] = useState(true);
   const [loading, setLoading] = useState(false);
   const backlinksCacheRef = useRef<BacklinkEntry[]>([]);
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   const vaultPath = useWorkspaceStore((s) => s.vaultPath);
   const openFile = useWorkspaceStore((s) => s.openFile);

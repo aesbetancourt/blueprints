@@ -3,7 +3,7 @@ import { ChevronRight, Plus, X } from 'lucide-react';
 import { VaultService, type FileTagInfo } from '../services/vault';
 import { useWorkspaceStore } from '../store/workspace';
 
-export function TagsPanel() {
+export function TagsPanel({ forceExpanded }: { forceExpanded?: boolean }) {
   const [tagData, setTagData] = useState<FileTagInfo[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(true);
@@ -11,6 +11,10 @@ export function TagsPanel() {
   const [addingTag, setAddingTag] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   const vaultPath = useWorkspaceStore((s) => s.vaultPath);
   const openFile = useWorkspaceStore((s) => s.openFile);

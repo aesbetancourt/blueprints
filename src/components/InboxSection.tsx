@@ -6,9 +6,13 @@ import { VaultService } from '../services/vault';
 import { useToastStore } from './Toast';
 import { MoveToModal } from './FileExplorer';
 
-export function InboxSection() {
+export function InboxSection({ forceExpanded }: { forceExpanded?: boolean }) {
   const [expanded, setExpanded] = useState(true);
   const [inboxFiles, setInboxFiles] = useState<{ name: string; path: string }[]>([]);
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
   const [contextMenu, setContextMenu] = useState<{
     path: string;
     position: { x: number; y: number };

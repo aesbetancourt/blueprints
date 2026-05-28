@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import {
   Box,
   ChevronDown,
@@ -13,8 +13,12 @@ import {
   EyeOff,
   ArrowDownWideNarrow,
   Check,
+  FoldVertical,
+  UnfoldVertical,
+  ChevronsDownUp,
+  ChevronsUpDown,
 } from 'lucide-react';
-import { FileExplorer } from './FileExplorer';
+import { FileExplorer, type FolderExpandSignal } from './FileExplorer';
 import { CreateFileButton } from './CreateFile';
 import { TableOfContents } from './TableOfContents';
 import { BacklinksPanel } from './BacklinksPanel';
@@ -43,7 +47,31 @@ export function Sidebar() {
   const [showArchive, setShowArchive] = useState(false);
   const [showHidden, setShowHidden] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
+  const [foldersExpanded, setFoldersExpanded] = useState(false);
+  const [folderExpandCount, setFolderExpandCount] = useState(0);
+  const [folderCollapseCount, setFolderCollapseCount] = useState(0);
+  const [panelsExpanded, setPanelsExpanded] = useState(true);
   const vaultMenuRef = useRef<HTMLDivElement>(null);
+
+  const folderExpandSignal: FolderExpandSignal = useMemo(
+    () => ({ expandAll: folderExpandCount, collapseAll: folderCollapseCount }),
+    [folderExpandCount, folderCollapseCount],
+  );
+
+  const toggleAllFolders = () => {
+    if (foldersExpanded) {
+      setFolderCollapseCount((c) => c + 1);
+    } else {
+      setFolderExpandCount((c) => c + 1);
+    }
+    setFoldersExpanded(!foldersExpanded);
+  };
+
+  const toggleAllPanels = () => {
+    const next = !panelsExpanded;
+    setPanelsExpanded(next);
+    setFilesExpanded(next);
+  };
 
   // Close vault menu on outside click
   useEffect(() => {
@@ -116,6 +144,17 @@ export function Sidebar() {
         <div className="flex items-center gap-1">
           <CreateFileButton />
           <button
+            onClick={toggleAllPanels}
+            className="p-1.5 rounded-md hover:bg-surface-2 text-muted hover:text-primary transition-colors"
+            title={panelsExpanded ? 'Collapse all panels' : 'Expand all panels'}
+          >
+            {panelsExpanded ? (
+              <ChevronsDownUp size={14} strokeWidth={1.5} />
+            ) : (
+              <ChevronsUpDown size={14} strokeWidth={1.5} />
+            )}
+          </button>
+          <button
             onClick={toggleSidebar}
             className="p-1.5 rounded-md hover:bg-surface-2 text-muted hover:text-primary transition-colors"
             title="Collapse sidebar (⌘B)"
@@ -128,10 +167,10 @@ export function Sidebar() {
       {/* Scrollable sections */}
       <div className="flex-1 overflow-y-auto min-h-0">
         {/* Pinned Files */}
-        <PinnedFiles />
+        <PinnedFiles forceExpanded={panelsExpanded} />
 
         {/* Inbox */}
-        <InboxSection />
+        <InboxSection forceExpanded={panelsExpanded} />
 
         {/* Files Section - collapsible */}
         <div className="border-t border-default">
@@ -186,6 +225,17 @@ export function Sidebar() {
                   <EyeOff size={12} strokeWidth={1.5} />
                 )}
               </button>
+              <button
+                onClick={toggleAllFolders}
+                className={`p-1 rounded hover:bg-surface-2 transition-colors text-muted hover:text-secondary`}
+                title={foldersExpanded ? 'Collapse all folders' : 'Expand all folders'}
+              >
+                {foldersExpanded ? (
+                  <FoldVertical size={12} strokeWidth={1.5} />
+                ) : (
+                  <UnfoldVertical size={12} strokeWidth={1.5} />
+                )}
+              </button>
             </div>
           </div>
 
@@ -215,6 +265,7 @@ export function Sidebar() {
                   isSelectMode={isSelectMode}
                   onEnterSelectMode={() => setIsSelectMode(true)}
                   onExitSelectMode={() => setIsSelectMode(false)}
+                  folderExpandSignal={folderExpandSignal}
                 />
               </div>
             </>
@@ -222,27 +273,31 @@ export function Sidebar() {
         </div>
 
         {/* Tags */}
-        <TagsPanel />
+        <TagsPanel forceExpanded={panelsExpanded} />
 
         {/* Outgoing Links */}
-        <OutgoingLinksPanel />
+        <OutgoingLinksPanel forceExpanded={panelsExpanded} />
 
         {/* Backlinks */}
-        <BacklinksPanel />
+        <BacklinksPanel forceExpanded={panelsExpanded} />
 
         {/* Notes/Annotations (only for md files) */}
-        <AnnotationsPanel />
+        <AnnotationsPanel forceExpanded={panelsExpanded} />
 
         {/* Outline (only for md files) */}
-        <TableOfContents />
+        <TableOfContents forceExpanded={panelsExpanded} />
       </div>
     </aside>
   );
 }
 
-function PinnedFiles() {
+function PinnedFiles({ forceExpanded }: { forceExpanded?: boolean }) {
   const { pinnedFiles, openFile, togglePin } = useWorkspaceStore();
   const [expanded, setExpanded] = useState(true);
+
+  useEffect(() => {
+    if (forceExpanded !== undefined) setExpanded(forceExpanded);
+  }, [forceExpanded]);
 
   if (pinnedFiles.length === 0) return null;
 
