@@ -12,6 +12,11 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(
+            tauri_plugin_zustand::Builder::new()
+                .autosave(std::time::Duration::from_secs(5))
+                .build(),
+        )
         .manage(AppState {
             vault_path: Mutex::new(None),
         })
@@ -67,6 +72,12 @@ pub fn run() {
             commands::git::git_log,
             commands::git::git_branches,
             commands::system::get_system_stats,
+            commands::state::get_store_value,
+            commands::state::get_store_state,
+            commands::state::set_store_value,
+            commands::state::patch_store,
+            commands::state::save_store,
+            commands::state::save_all_stores,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

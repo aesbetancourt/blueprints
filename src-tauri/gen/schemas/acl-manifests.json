@@ -2046,5 +2046,292 @@
       "description": "Shell scope entry.",
       "title": "ShellScopeEntry"
     }
+  },
+  "zustand": {
+    "default_permission": {
+      "identifier": "default",
+      "description": "Default permissions for tauri-plugin-zustand.",
+      "permissions": [
+        "allow-allow-save",
+        "allow-allow-sync",
+        "allow-clear-autosave",
+        "allow-deny-save",
+        "allow-deny-sync",
+        "allow-destroy",
+        "allow-get-default-save-strategy",
+        "allow-get-save-strategy",
+        "allow-get-store-collection-path",
+        "allow-get-store-ids",
+        "allow-get-store-path",
+        "allow-get-store-state",
+        "allow-load",
+        "allow-patch",
+        "allow-save",
+        "allow-save-all",
+        "allow-save-all-now",
+        "allow-save-now",
+        "allow-save-some",
+        "allow-save-some-now",
+        "allow-set-autosave",
+        "allow-set-save-strategy",
+        "allow-set-store-collection-path",
+        "allow-set-store-options",
+        "allow-unload"
+      ]
+    },
+    "permissions": {
+      "allow-allow-save": {
+        "identifier": "allow-allow-save",
+        "description": "Enables the allow_save command without any pre-configured scope.",
+        "commands": { "allow": ["allow_save"], "deny": [] }
+      },
+      "allow-allow-sync": {
+        "identifier": "allow-allow-sync",
+        "description": "Enables the allow_sync command without any pre-configured scope.",
+        "commands": { "allow": ["allow_sync"], "deny": [] }
+      },
+      "allow-clear-autosave": {
+        "identifier": "allow-clear-autosave",
+        "description": "Enables the clear_autosave command without any pre-configured scope.",
+        "commands": { "allow": ["clear_autosave"], "deny": [] }
+      },
+      "allow-deny-save": {
+        "identifier": "allow-deny-save",
+        "description": "Enables the deny_save command without any pre-configured scope.",
+        "commands": { "allow": ["deny_save"], "deny": [] }
+      },
+      "allow-deny-sync": {
+        "identifier": "allow-deny-sync",
+        "description": "Enables the deny_sync command without any pre-configured scope.",
+        "commands": { "allow": ["deny_sync"], "deny": [] }
+      },
+      "allow-destroy": {
+        "identifier": "allow-destroy",
+        "description": "Enables the destroy command without any pre-configured scope.",
+        "commands": { "allow": ["destroy"], "deny": [] }
+      },
+      "allow-get-default-save-strategy": {
+        "identifier": "allow-get-default-save-strategy",
+        "description": "Enables the get_default_save_strategy command without any pre-configured scope.",
+        "commands": { "allow": ["get_default_save_strategy"], "deny": [] }
+      },
+      "allow-get-save-strategy": {
+        "identifier": "allow-get-save-strategy",
+        "description": "Enables the get_save_strategy command without any pre-configured scope.",
+        "commands": { "allow": ["get_save_strategy"], "deny": [] }
+      },
+      "allow-get-store-collection-path": {
+        "identifier": "allow-get-store-collection-path",
+        "description": "Enables the get_store_collection_path command without any pre-configured scope.",
+        "commands": { "allow": ["get_store_collection_path"], "deny": [] }
+      },
+      "allow-get-store-ids": {
+        "identifier": "allow-get-store-ids",
+        "description": "Enables the get_store_ids command without any pre-configured scope.",
+        "commands": { "allow": ["get_store_ids"], "deny": [] }
+      },
+      "allow-get-store-path": {
+        "identifier": "allow-get-store-path",
+        "description": "Enables the get_store_path command without any pre-configured scope.",
+        "commands": { "allow": ["get_store_path"], "deny": [] }
+      },
+      "allow-get-store-state": {
+        "identifier": "allow-get-store-state",
+        "description": "Enables the get_store_state command without any pre-configured scope.",
+        "commands": { "allow": ["get_store_state"], "deny": [] }
+      },
+      "allow-load": {
+        "identifier": "allow-load",
+        "description": "Enables the load command without any pre-configured scope.",
+        "commands": { "allow": ["load"], "deny": [] }
+      },
+      "allow-patch": {
+        "identifier": "allow-patch",
+        "description": "Enables the patch command without any pre-configured scope.",
+        "commands": { "allow": ["patch"], "deny": [] }
+      },
+      "allow-save": {
+        "identifier": "allow-save",
+        "description": "Enables the save command without any pre-configured scope.",
+        "commands": { "allow": ["save"], "deny": [] }
+      },
+      "allow-save-all": {
+        "identifier": "allow-save-all",
+        "description": "Enables the save_all command without any pre-configured scope.",
+        "commands": { "allow": ["save_all"], "deny": [] }
+      },
+      "allow-save-all-now": {
+        "identifier": "allow-save-all-now",
+        "description": "Enables the save_all_now command without any pre-configured scope.",
+        "commands": { "allow": ["save_all_now"], "deny": [] }
+      },
+      "allow-save-now": {
+        "identifier": "allow-save-now",
+        "description": "Enables the save_now command without any pre-configured scope.",
+        "commands": { "allow": ["save_now"], "deny": [] }
+      },
+      "allow-save-some": {
+        "identifier": "allow-save-some",
+        "description": "Enables the save_some command without any pre-configured scope.",
+        "commands": { "allow": ["save_some"], "deny": [] }
+      },
+      "allow-save-some-now": {
+        "identifier": "allow-save-some-now",
+        "description": "Enables the save_some_now command without any pre-configured scope.",
+        "commands": { "allow": ["save_some_now"], "deny": [] }
+      },
+      "allow-set-autosave": {
+        "identifier": "allow-set-autosave",
+        "description": "Enables the set_autosave command without any pre-configured scope.",
+        "commands": { "allow": ["set_autosave"], "deny": [] }
+      },
+      "allow-set-save-strategy": {
+        "identifier": "allow-set-save-strategy",
+        "description": "Enables the set_save_strategy command without any pre-configured scope.",
+        "commands": { "allow": ["set_save_strategy"], "deny": [] }
+      },
+      "allow-set-store-collection-path": {
+        "identifier": "allow-set-store-collection-path",
+        "description": "Enables the set_store_collection_path command without any pre-configured scope.",
+        "commands": { "allow": ["set_store_collection_path"], "deny": [] }
+      },
+      "allow-set-store-options": {
+        "identifier": "allow-set-store-options",
+        "description": "Enables the set_store_options command without any pre-configured scope.",
+        "commands": { "allow": ["set_store_options"], "deny": [] }
+      },
+      "allow-unload": {
+        "identifier": "allow-unload",
+        "description": "Enables the unload command without any pre-configured scope.",
+        "commands": { "allow": ["unload"], "deny": [] }
+      },
+      "deny-allow-save": {
+        "identifier": "deny-allow-save",
+        "description": "Denies the allow_save command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["allow_save"] }
+      },
+      "deny-allow-sync": {
+        "identifier": "deny-allow-sync",
+        "description": "Denies the allow_sync command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["allow_sync"] }
+      },
+      "deny-clear-autosave": {
+        "identifier": "deny-clear-autosave",
+        "description": "Denies the clear_autosave command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["clear_autosave"] }
+      },
+      "deny-deny-save": {
+        "identifier": "deny-deny-save",
+        "description": "Denies the deny_save command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["deny_save"] }
+      },
+      "deny-deny-sync": {
+        "identifier": "deny-deny-sync",
+        "description": "Denies the deny_sync command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["deny_sync"] }
+      },
+      "deny-destroy": {
+        "identifier": "deny-destroy",
+        "description": "Denies the destroy command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["destroy"] }
+      },
+      "deny-get-default-save-strategy": {
+        "identifier": "deny-get-default-save-strategy",
+        "description": "Denies the get_default_save_strategy command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["get_default_save_strategy"] }
+      },
+      "deny-get-save-strategy": {
+        "identifier": "deny-get-save-strategy",
+        "description": "Denies the get_save_strategy command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["get_save_strategy"] }
+      },
+      "deny-get-store-collection-path": {
+        "identifier": "deny-get-store-collection-path",
+        "description": "Denies the get_store_collection_path command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["get_store_collection_path"] }
+      },
+      "deny-get-store-ids": {
+        "identifier": "deny-get-store-ids",
+        "description": "Denies the get_store_ids command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["get_store_ids"] }
+      },
+      "deny-get-store-path": {
+        "identifier": "deny-get-store-path",
+        "description": "Denies the get_store_path command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["get_store_path"] }
+      },
+      "deny-get-store-state": {
+        "identifier": "deny-get-store-state",
+        "description": "Denies the get_store_state command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["get_store_state"] }
+      },
+      "deny-load": {
+        "identifier": "deny-load",
+        "description": "Denies the load command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["load"] }
+      },
+      "deny-patch": {
+        "identifier": "deny-patch",
+        "description": "Denies the patch command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["patch"] }
+      },
+      "deny-save": {
+        "identifier": "deny-save",
+        "description": "Denies the save command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["save"] }
+      },
+      "deny-save-all": {
+        "identifier": "deny-save-all",
+        "description": "Denies the save_all command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["save_all"] }
+      },
+      "deny-save-all-now": {
+        "identifier": "deny-save-all-now",
+        "description": "Denies the save_all_now command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["save_all_now"] }
+      },
+      "deny-save-now": {
+        "identifier": "deny-save-now",
+        "description": "Denies the save_now command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["save_now"] }
+      },
+      "deny-save-some": {
+        "identifier": "deny-save-some",
+        "description": "Denies the save_some command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["save_some"] }
+      },
+      "deny-save-some-now": {
+        "identifier": "deny-save-some-now",
+        "description": "Denies the save_some_now command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["save_some_now"] }
+      },
+      "deny-set-autosave": {
+        "identifier": "deny-set-autosave",
+        "description": "Denies the set_autosave command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_autosave"] }
+      },
+      "deny-set-save-strategy": {
+        "identifier": "deny-set-save-strategy",
+        "description": "Denies the set_save_strategy command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_save_strategy"] }
+      },
+      "deny-set-store-collection-path": {
+        "identifier": "deny-set-store-collection-path",
+        "description": "Denies the set_store_collection_path command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_store_collection_path"] }
+      },
+      "deny-set-store-options": {
+        "identifier": "deny-set-store-options",
+        "description": "Denies the set_store_options command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["set_store_options"] }
+      },
+      "deny-unload": {
+        "identifier": "deny-unload",
+        "description": "Denies the unload command without any pre-configured scope.",
+        "commands": { "allow": [], "deny": ["unload"] }
+      }
+    },
+    "permission_sets": {},
+    "global_scope_schema": null
   }
 }

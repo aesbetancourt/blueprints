@@ -44,6 +44,9 @@ importers:
       '@tauri-apps/plugin-shell':
         specifier: ^2.3.5
         version: 2.3.5
+      '@tauri-store/zustand':
+        specifier: ^1.2.0
+        version: 1.2.0(@types/react@19.2.15)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
       '@tiptap/core':
         specifier: ^3.23.6
         version: 3.23.6(@tiptap/pm@3.23.6)
@@ -1799,6 +1802,12 @@ packages:
 
   '@tauri-apps/plugin-shell@2.3.5':
     resolution: {integrity: sha512-jewtULhiQ7lI7+owCKAjc8tYLJr92U16bPOeAa472LHJdgaibLP83NcfAF2e+wkEcA53FxKQAZ7byDzs2eeizg==}
+
+  '@tauri-store/shared@0.10.3':
+    resolution: {integrity: sha512-6S2SbYxZUBOLL/t+49cIF4gdZNxYnw9yitNlIUsgiPI5ApRtdXfj4JdQd7WmDwoQXXTOzlOYaqGpmICWhzmmRg==}
+
+  '@tauri-store/zustand@1.2.0':
+    resolution: {integrity: sha512-P/QoSn7fHaYaKrSm8khuyRxm0rTQ6iqjG0fUenq+ul4LIqKi6yRPpDJNlzYKCLfH6KgVNjzboq+jQal+kPG9mg==}
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -6076,6 +6085,22 @@ snapshots:
   '@tauri-apps/plugin-shell@2.3.5':
     dependencies:
       '@tauri-apps/api': 2.11.0
+
+  '@tauri-store/shared@0.10.3':
+    dependencies:
+      '@tauri-apps/api': 2.11.0
+      es-toolkit: 1.46.1
+
+  '@tauri-store/zustand@1.2.0(@types/react@19.2.15)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))':
+    dependencies:
+      '@tauri-apps/api': 2.11.0
+      '@tauri-store/shared': 0.10.3
+      zustand: 5.0.13(@types/react@19.2.15)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - react
+      - use-sync-external-store
 
   '@testing-library/dom@10.4.1':
     dependencies:

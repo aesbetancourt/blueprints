@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createTauriStore } from '@tauri-store/zustand';
 
 export interface EditorSettings {
   fontSize: number;
@@ -119,9 +119,67 @@ const DEFAULT_VARIABLES: Record<string, string> = {
   project: '',
 };
 
-export const useSettingsStore = create<SettingsState>()(
-  persist(
-    (set) => ({
+export const useSettingsStore = create<SettingsState>()((set) => ({
+  editor: DEFAULT_EDITOR,
+  file: DEFAULT_FILE,
+  token: DEFAULT_TOKEN,
+  quickNote: DEFAULT_QUICK_NOTE,
+  shortcuts: DEFAULT_SHORTCUTS,
+  tags: DEFAULT_TAGS,
+  fileTags: {},
+  variables: DEFAULT_VARIABLES,
+
+  updateEditor: (partial) => set((s) => ({ editor: { ...s.editor, ...partial } })),
+
+  updateFile: (partial) => set((s) => ({ file: { ...s.file, ...partial } })),
+
+  updateToken: (partial) => set((s) => ({ token: { ...s.token, ...partial } })),
+
+  updateQuickNote: (partial) => set((s) => ({ quickNote: { ...s.quickNote, ...partial } })),
+
+  updateShortcut: (id, keys) =>
+    set((s) => ({
+      shortcuts: s.shortcuts.map((sc) => (sc.id === id ? { ...sc, keys } : sc)),
+    })),
+
+  addTag: (tag) => set((s) => ({ tags: [...s.tags, tag] })),
+
+  removeTag: (id) =>
+    set((s) => ({
+      tags: s.tags.filter((t) => t.id !== id),
+      fileTags: Object.fromEntries(
+        Object.entries(s.fileTags).map(([path, ids]) => [path, ids.filter((tid) => tid !== id)]),
+      ),
+    })),
+
+  assignTag: (path, tagId) =>
+    set((s) => {
+      const current = s.fileTags[path] ?? [];
+      if (current.includes(tagId)) return s;
+      return { fileTags: { ...s.fileTags, [path]: [...current, tagId] } };
+    }),
+
+  unassignTag: (path, tagId) =>
+    set((s) => {
+      const current = s.fileTags[path] ?? [];
+      const updated = current.filter((id) => id !== tagId);
+      if (updated.length === 0) {
+        return {
+          fileTags: Object.fromEntries(Object.entries(s.fileTags).filter(([key]) => key !== path)),
+        };
+      }
+      return { fileTags: { ...s.fileTags, [path]: updated } };
+    }),
+
+  setVariable: (key, value) => set((s) => ({ variables: { ...s.variables, [key]: value } })),
+
+  removeVariable: (key) =>
+    set((s) => ({
+      variables: Object.fromEntries(Object.entries(s.variables).filter(([k]) => k !== key)),
+    })),
+
+  resetAll: () =>
+    set({
       editor: DEFAULT_EDITOR,
       file: DEFAULT_FILE,
       token: DEFAULT_TOKEN,
@@ -130,105 +188,63 @@ export const useSettingsStore = create<SettingsState>()(
       tags: DEFAULT_TAGS,
       fileTags: {},
       variables: DEFAULT_VARIABLES,
-
-      updateEditor: (partial) => set((s) => ({ editor: { ...s.editor, ...partial } })),
-
-      updateFile: (partial) => set((s) => ({ file: { ...s.file, ...partial } })),
-
-      updateToken: (partial) => set((s) => ({ token: { ...s.token, ...partial } })),
-
-      updateQuickNote: (partial) => set((s) => ({ quickNote: { ...s.quickNote, ...partial } })),
-
-      updateShortcut: (id, keys) =>
-        set((s) => ({
-          shortcuts: s.shortcuts.map((sc) => (sc.id === id ? { ...sc, keys } : sc)),
-        })),
-
-      addTag: (tag) => set((s) => ({ tags: [...s.tags, tag] })),
-
-      removeTag: (id) =>
-        set((s) => ({
-          tags: s.tags.filter((t) => t.id !== id),
-          fileTags: Object.fromEntries(
-            Object.entries(s.fileTags).map(([path, ids]) => [
-              path,
-              ids.filter((tid) => tid !== id),
-            ]),
-          ),
-        })),
-
-      assignTag: (path, tagId) =>
-        set((s) => {
-          const current = s.fileTags[path] ?? [];
-          if (current.includes(tagId)) return s;
-          return { fileTags: { ...s.fileTags, [path]: [...current, tagId] } };
-        }),
-
-      unassignTag: (path, tagId) =>
-        set((s) => {
-          const current = s.fileTags[path] ?? [];
-          const updated = current.filter((id) => id !== tagId);
-          if (updated.length === 0) {
-            return {
-              fileTags: Object.fromEntries(
-                Object.entries(s.fileTags).filter(([key]) => key !== path),
-              ),
-            };
-          }
-          return { fileTags: { ...s.fileTags, [path]: updated } };
-        }),
-
-      setVariable: (key, value) => set((s) => ({ variables: { ...s.variables, [key]: value } })),
-
-      removeVariable: (key) =>
-        set((s) => ({
-          variables: Object.fromEntries(Object.entries(s.variables).filter(([k]) => k !== key)),
-        })),
-
-      resetAll: () =>
-        set({
-          editor: DEFAULT_EDITOR,
-          file: DEFAULT_FILE,
-          token: DEFAULT_TOKEN,
-          quickNote: DEFAULT_QUICK_NOTE,
-          shortcuts: DEFAULT_SHORTCUTS,
-          tags: DEFAULT_TAGS,
-          fileTags: {},
-          variables: DEFAULT_VARIABLES,
-        }),
     }),
-    {
-      name: 'blueprints-settings',
-      merge: (persisted, current) => {
-        const state = persisted as Partial<SettingsState> | undefined;
-        if (!state) return current;
-        const merged = {
-          ...current,
-          ...state,
-          editor: { ...current.editor, ...state.editor },
-          file: { ...current.file, ...state.file },
-          token: { ...current.token, ...state.token },
-          quickNote: { ...current.quickNote, ...state.quickNote },
-          variables: { ...current.variables, ...state.variables },
-        };
-        // Migrate: ensure *.json is in includePatterns for existing users
-        if (merged.file.includePatterns && !merged.file.includePatterns.includes('*.json')) {
-          merged.file = {
-            ...merged.file,
-            includePatterns: [...merged.file.includePatterns, '*.json'],
+}));
+
+// Tauri Store handler — persists settings to disk
+// On hydration: deep-merges nested objects, migrates includePatterns
+export const settingsStoreHandler = createTauriStore(
+  'settings',
+  useSettingsStore as unknown as import('zustand').StoreApi<Record<string, unknown>>,
+  {
+    autoStart: false,
+    saveOnChange: true,
+    saveStrategy: 'debounce',
+    saveInterval: 1000,
+    filterKeys: [
+      'editor',
+      'file',
+      'token',
+      'quickNote',
+      'shortcuts',
+      'tags',
+      'fileTags',
+      'variables',
+    ],
+    filterKeysStrategy: 'pick',
+    hooks: {
+      beforeFrontendSync: (state) => {
+        // Deep-merge nested settings objects with defaults
+        if (state.editor) {
+          state.editor = { ...DEFAULT_EDITOR, ...(state.editor as EditorSettings) };
+        }
+        if (state.file) {
+          state.file = { ...DEFAULT_FILE, ...(state.file as FileSettings) };
+          // Migrate: ensure all supported patterns exist
+          const required = ['*.json', '*.yaml', '*.yml', '*.xml', '*.csv'];
+          const patterns = (state.file as FileSettings).includePatterns ?? [];
+          const missing = required.filter((p) => !patterns.includes(p));
+          if (missing.length > 0) {
+            (state.file as FileSettings).includePatterns = [...patterns, ...missing];
+          }
+        }
+        if (state.token) {
+          state.token = { ...DEFAULT_TOKEN, ...(state.token as TokenSettings) };
+        }
+        if (state.quickNote) {
+          state.quickNote = { ...DEFAULT_QUICK_NOTE, ...(state.quickNote as QuickNoteSettings) };
+        }
+        if (state.variables) {
+          state.variables = {
+            ...DEFAULT_VARIABLES,
+            ...(state.variables as Record<string, string>),
           };
         }
-        // Migrate: ensure new data formats are in includePatterns for existing users
-        const newPatterns = ['*.yaml', '*.yml', '*.xml', '*.csv'];
-        const missing = newPatterns.filter((p) => !merged.file.includePatterns?.includes(p));
-        if (missing.length > 0 && merged.file.includePatterns) {
-          merged.file = {
-            ...merged.file,
-            includePatterns: [...merged.file.includePatterns, ...missing],
-          };
-        }
-        return merged;
+        return state;
+      },
+      error: (err) => {
+        console.error('[settings store]', err);
       },
     },
-  ),
+  },
 );
