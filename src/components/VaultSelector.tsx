@@ -7,6 +7,9 @@ import { Box, FolderClosed } from 'lucide-react';
 
 export function VaultSelector() {
   const setVault = useWorkspaceStore((s: { setVault: (p: string) => void }) => s.setVault);
+  const setVaultReady = useWorkspaceStore(
+    (s: { setVaultReady: (ready: boolean) => void }) => s.setVaultReady,
+  );
   const setFileTree = useWorkspaceStore(
     (s: { setFileTree: (t: FileEntry[]) => void }) => s.setFileTree,
   );
@@ -20,8 +23,9 @@ export function VaultSelector() {
     const path = selected as string;
     try {
       await VaultService.openVault(path);
-      const tree = await VaultService.listFiles(path);
       setVault(path);
+      setVaultReady(true);
+      const tree = await VaultService.listFiles(path);
       setFileTree(mapFileEntries(tree));
     } catch (err) {
       addToast(`Failed to open vault: ${err}`, 'error');
@@ -31,8 +35,9 @@ export function VaultSelector() {
   const handleOpenRecent = async (vault: RecentVault) => {
     try {
       await VaultService.openVault(vault.path);
-      const tree = await VaultService.listFiles(vault.path);
       setVault(vault.path);
+      setVaultReady(true);
+      const tree = await VaultService.listFiles(vault.path);
       setFileTree(mapFileEntries(tree));
     } catch (err) {
       addToast(`Failed to open "${vault.name}": ${err}`, 'error');

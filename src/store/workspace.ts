@@ -4,12 +4,20 @@ import { VaultService } from '../services/vault';
 
 export type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json' | 'yaml' | 'xml' | 'csv';
 
+export interface TabGroup {
+  id: string;
+  name: string;
+  order: number;
+  collapsed: boolean;
+}
+
 export interface Tab {
   id: string;
   filePath: string;
   fileName: string;
   fileType: FileType;
   isDirty: boolean;
+  groupId?: string;
 }
 
 export interface FileEntry {
@@ -40,6 +48,7 @@ export interface DocumentStats {
 
 interface WorkspaceState {
   vaultPath: string | null;
+  vaultReady: boolean;
   fileTree: FileEntry[];
   openTabs: Tab[];
   activeTabId: string | null;
@@ -52,8 +61,10 @@ interface WorkspaceState {
   foldersFirst: boolean;
   documentStats: DocumentStats | null;
   pinnedFiles: string[];
+  tabGroups: TabGroup[];
 
   setVault: (path: string) => void;
+  setVaultReady: (ready: boolean) => void;
   closeVault: () => void;
   setFileTree: (tree: FileEntry[]) => void;
   setDocumentStats: (stats: DocumentStats | null) => void;
@@ -74,6 +85,12 @@ interface WorkspaceState {
   closeTabsToRight: (id: string) => void;
   closeTabsToLeft: (id: string) => void;
   togglePin: (path: string) => void;
+  moveTabToNewGroup: (tabId: string) => void;
+  moveTabToGroup: (tabId: string, groupId: string) => void;
+  renameGroup: (groupId: string, name: string) => void;
+  deleteGroup: (groupId: string) => void;
+  removeTabFromGroup: (tabId: string) => void;
+  toggleGroupCollapsed: (groupId: string) => void;
 }
 
 function getFileType(path: string): FileType {
@@ -94,6 +111,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     (set, get) => ({
       vaultPath: null,
+      vaultReady: false,
       fileTree: [],
       openTabs: [],
       activeTabId: null,
@@ -106,6 +124,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       foldersFirst: true,
       documentStats: null,
       pinnedFiles: [],
+      tabGroups: [],
 
       setVault: (path) => {
         const name = path.split('/').pop() ?? path;
@@ -117,9 +136,12 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         set({ vaultPath: path, recentVaults: updated });
       },
 
+      setVaultReady: (ready) => set({ vaultReady: ready }),
+
       closeVault: () =>
         set({
           vaultPath: null,
+          vaultReady: false,
           fileTree: [],
           openTabs: [],
           activeTabId: null,
@@ -152,7 +174,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       },
 
       closeTab: (id) => {
-        const { openTabs, activeTabId, splitTabId } = get();
+        const { openTabs, activeTabId, splitTabId, tabGroups } = get();
+        const closedTab = openTabs.find((t) => t.id === id);
         const idx = openTabs.findIndex((t) => t.id === id);
         const next = openTabs.filter((t) => t.id !== id);
         let newActive = activeTabId;
@@ -161,7 +184,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           newActive = prev?.id ?? null;
         }
         const newSplit = splitTabId === id ? null : splitTabId;
-        set({ openTabs: next, activeTabId: newActive, splitTabId: newSplit });
+        // Auto-delete empty groups
+        let newGroups = tabGroups;
+        if (closedTab?.groupId) {
+          const groupStillHasTabs = next.some((t) => t.groupId === closedTab.groupId);
+          if (!groupStillHasTabs) {
+            newGroups = tabGroups.filter((g) => g.id !== closedTab.groupId);
+          }
+        }
+        set({ openTabs: next, activeTabId: newActive, splitTabId: newSplit, tabGroups: newGroups });
       },
 
       setActiveTab: (id) => set({ activeTabId: id }),
@@ -272,6 +303,62 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             : [...s.pinnedFiles, path];
           return { pinnedFiles: pinned };
         }),
+
+      moveTabToNewGroup: (tabId) =>
+        set((s) => {
+          const nextOrder =
+            s.tabGroups.length > 0 ? Math.max(...s.tabGroups.map((g) => g.order)) + 1 : 1;
+          const groupId = `group-${Date.now()}`;
+          const newGroup: TabGroup = {
+            id: groupId,
+            name: `Group ${nextOrder}`,
+            order: nextOrder,
+            collapsed: false,
+          };
+          const openTabs = s.openTabs.map((t) => (t.id === tabId ? { ...t, groupId } : t));
+          return { tabGroups: [...s.tabGroups, newGroup], openTabs };
+        }),
+
+      moveTabToGroup: (tabId, groupId) =>
+        set((s) => ({
+          openTabs: s.openTabs.map((t) => (t.id === tabId ? { ...t, groupId } : t)),
+        })),
+
+      renameGroup: (groupId, name) =>
+        set((s) => ({
+          tabGroups: s.tabGroups.map((g) => (g.id === groupId ? { ...g, name } : g)),
+        })),
+
+      deleteGroup: (groupId) =>
+        set((s) => ({
+          tabGroups: s.tabGroups.filter((g) => g.id !== groupId),
+          openTabs: s.openTabs.map((t) =>
+            t.groupId === groupId ? { ...t, groupId: undefined } : t,
+          ),
+        })),
+
+      removeTabFromGroup: (tabId) =>
+        set((s) => {
+          const tab = s.openTabs.find((t) => t.id === tabId);
+          if (!tab?.groupId) return {};
+          const groupId = tab.groupId;
+          const openTabs = s.openTabs.map((t) =>
+            t.id === tabId ? { ...t, groupId: undefined } : t,
+          );
+          // If the group is now empty, auto-delete it
+          const groupStillHasTabs = openTabs.some((t) => t.groupId === groupId);
+          const tabGroups = groupStillHasTabs
+            ? s.tabGroups
+            : s.tabGroups.filter((g) => g.id !== groupId);
+          return { openTabs, tabGroups };
+        }),
+
+      toggleGroupCollapsed: (groupId) =>
+        set((s) => ({
+          tabGroups: s.tabGroups.map((g) =>
+            g.id === groupId ? { ...g, collapsed: !g.collapsed } : g,
+          ),
+        })),
     }),
     {
       name: 'blueprints-workspace',
@@ -286,6 +373,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         sortMode: state.sortMode,
         foldersFirst: state.foldersFirst,
         pinnedFiles: state.pinnedFiles,
+        tabGroups: state.tabGroups,
       }),
       merge: (persisted, current) => {
         const state = persisted as Partial<WorkspaceState> | undefined;
@@ -298,6 +386,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             fileType: getFileType(t.filePath),
           }));
         }
+        // Hydration safety for tabGroups
+        merged.tabGroups = merged.tabGroups ?? [];
         return merged;
       },
     },

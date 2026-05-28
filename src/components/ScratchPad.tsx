@@ -3,7 +3,7 @@ import { FileText, X } from 'lucide-react';
 import { confirm } from './ConfirmDialog';
 
 const STORAGE_KEY = 'blueprints-scratchpad';
-const SAVE_DELAY = 500;
+const SAVE_DELAY = 5000;
 
 interface ScratchPadProps {
   open: boolean;

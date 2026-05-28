@@ -2,7 +2,7 @@ mod commands;
 mod watcher;
 
 use std::sync::Mutex;
-use tauri::menu::{Menu, MenuItem, Submenu};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 
 pub struct AppState {
     pub vault_path: Mutex<Option<String>>,
@@ -19,14 +19,14 @@ pub fn run() {
             // Custom menu without Cmd+N to avoid intercepting our shortcut
             let quit = MenuItem::with_id(app, "quit", "Quit", true, Some("CmdOrCtrl+Q"))?;
             let close = MenuItem::with_id(app, "close", "Close Window", true, Some("CmdOrCtrl+Shift+W"))?;
-            let undo = MenuItem::with_id(app, "undo", "Undo", true, Some("CmdOrCtrl+Z"))?;
-            let redo = MenuItem::with_id(app, "redo", "Redo", true, Some("CmdOrCtrl+Shift+Z"))?;
-            let cut = MenuItem::with_id(app, "cut", "Cut", true, Some("CmdOrCtrl+X"))?;
-            let copy = MenuItem::with_id(app, "copy", "Copy", true, Some("CmdOrCtrl+C"))?;
-            let paste = MenuItem::with_id(app, "paste", "Paste", true, Some("CmdOrCtrl+V"))?;
-            let select_all = MenuItem::with_id(app, "select_all", "Select All", true, Some("CmdOrCtrl+A"))?;
-            let minimize = MenuItem::with_id(app, "minimize", "Minimize", true, Some("CmdOrCtrl+M"))?;
-            let fullscreen = MenuItem::with_id(app, "fullscreen", "Toggle Full Screen", true, Some("Ctrl+CmdOrCtrl+F"))?;
+            let undo = PredefinedMenuItem::undo(app, None)?;
+            let redo = PredefinedMenuItem::redo(app, None)?;
+            let cut = PredefinedMenuItem::cut(app, None)?;
+            let copy = PredefinedMenuItem::copy(app, None)?;
+            let paste = PredefinedMenuItem::paste(app, None)?;
+            let select_all = PredefinedMenuItem::select_all(app, None)?;
+            let minimize = PredefinedMenuItem::minimize(app, None)?;
+            let fullscreen = PredefinedMenuItem::fullscreen(app, None)?;
 
             let app_menu = Submenu::with_items(app, "Blueprints", true, &[&quit])?;
             let file_menu = Submenu::with_items(app, "File", true, &[&close])?;

@@ -7,13 +7,30 @@ import { Breadcrumbs } from './Breadcrumbs';
 import { Panel, Group, Separator } from 'react-resizable-panels';
 
 export function EditorArea() {
-  const { openTabs, activeTabId, splitTabId } = useWorkspaceStore();
+  const { openTabs, activeTabId, splitTabId, vaultReady } = useWorkspaceStore();
   const activeTab = openTabs.find((t: Tab) => t.id === activeTabId);
   const splitTab = splitTabId ? openTabs.find((t: Tab) => t.id === splitTabId) : null;
   const [editorMode, setEditorMode] = useState<'rich' | 'raw'>('rich');
 
   // Only show mode toggle for md files
   const showModeToggle = activeTab?.fileType === 'md';
+
+  // Wait for vault to be initialized before rendering editors
+  if (!vaultReady && activeTab) {
+    return (
+      <div className="h-full flex flex-col bg-surface-0">
+        <TabBar />
+        <Breadcrumbs
+          editorMode={editorMode}
+          onEditorModeChange={setEditorMode}
+          showModeToggle={showModeToggle}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-sm text-muted">Loading vault...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-surface-0">
