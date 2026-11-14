@@ -37,6 +37,11 @@ export const VaultService = {
     return content;
   },
 
+  /** Read raw bytes (images). Not cached here — see utils/imageFiles. */
+  async readBinaryFile(path: string): Promise<ArrayBuffer> {
+    return invoke<ArrayBuffer>('read_binary_file', { path });
+  },
+
   /** Get cached content synchronously (returns undefined if not cached) */
   getCached(path: string): string | undefined {
     return this._cache.get(path);

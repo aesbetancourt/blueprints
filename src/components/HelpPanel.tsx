@@ -273,6 +273,14 @@ function HelpContent({ section }: { section: Section }) {
               label="JSON"
               description="Open .json files for split-view editing with CodeMirror and an interactive graph visualization."
             />
+            <HelpItem
+              label="Images"
+              description="Open .png, .jpg, .gif, .webp, .avif, .svg, .bmp, or .ico files in the image viewer. Drag to pan. Pinch or ⌘/Ctrl+scroll to zoom. Keys: + / − zoom, 0 fit, 1 actual size, R rotate, arrows pan."
+            />
+            <HelpItem
+              label="Images in Markdown"
+              description="Use ![alt](path). Relative paths start from the note's folder. A leading / starts from the vault root. Double-click an image to open it in the viewer."
+            />
           </HelpGroup>
           <HelpGroup title="Saving">
             <HelpItem

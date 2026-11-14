@@ -46,6 +46,7 @@ pub fn run() {
             commands::vault::open_vault,
             commands::files::list_files,
             commands::files::read_file,
+            commands::files::read_binary_file,
             commands::files::write_file,
             commands::files::create_file,
             commands::files::file_exists,

@@ -113,6 +113,15 @@ pub async fn read_file(path: String, state: tauri::State<'_, crate::AppState>) -
     fs::read_to_string(&path).map_err(|e| e.to_string())
 }
 
+/// Read a file as raw bytes (e.g. images). Returns an ArrayBuffer to the frontend.
+#[command]
+pub async fn read_binary_file(path: String, state: tauri::State<'_, crate::AppState>) -> Result<tauri::ipc::Response, String> {
+    let vault_root = get_vault_root(&state)?;
+    validate_path(&path, &vault_root)?;
+    let bytes = fs::read(&path).map_err(|e| e.to_string())?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
 #[command]
 pub async fn write_file(path: String, content: String, state: tauri::State<'_, crate::AppState>) -> Result<(), String> {
     let vault_root = get_vault_root(&state)?;

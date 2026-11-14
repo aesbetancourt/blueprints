@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { createTauriStore } from '@tauri-store/zustand';
 import { VaultService } from '../services/vault';
+import { isImagePath, loadImage } from '../utils/imageFiles';
 
-export type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json' | 'yaml' | 'xml' | 'csv';
+export type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json' | 'yaml' | 'xml' | 'csv' | 'image';
 
 export interface TabGroup {
   id: string;
@@ -100,6 +101,7 @@ function getFileType(path: string): FileType {
   if (path.endsWith('.yaml') || path.endsWith('.yml')) return 'yaml';
   if (path.endsWith('.xml')) return 'xml';
   if (path.endsWith('.csv')) return 'csv';
+  if (isImagePath(path)) return 'image';
   return 'md';
 }
 
@@ -168,7 +170,8 @@ export const useWorkspaceStore = create<WorkspaceState>()((set, get) => ({
     const updatedRecent = [path, ...recentFiles.filter((r) => r !== path)].slice(0, 20);
     set({ openTabs: [...openTabs, tab], activeTabId: tab.id, recentFiles: updatedRecent });
     // Pre-fetch file content into cache so EditorPane renders instantly
-    VaultService.readFile(path).catch(() => {});
+    if (tab.fileType === 'image') loadImage(path).catch(() => {});
+    else VaultService.readFile(path).catch(() => {});
   },
 
   closeTab: (id) => {

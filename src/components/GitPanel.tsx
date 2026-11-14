@@ -3,6 +3,7 @@ import { GitCommit, RefreshCw, Plus, Minus, Undo } from 'lucide-react';
 import { useGitStore } from '../store/git';
 import { useSettingsStore } from '../store/settings';
 import { useToastStore } from './Toast';
+import { IMAGE_INCLUDE_PATTERNS } from '../utils/imageFiles';
 
 export function GitPanel() {
   const {
@@ -36,6 +37,7 @@ export function GitPanel() {
     '*.yml',
     '*.xml',
     '*.csv',
+    ...IMAGE_INCLUDE_PATTERNS,
   ];
   const [commitMsg, setCommitMsg] = useState('');
   const [view, setView] = useState<'changes' | 'log'>('changes');

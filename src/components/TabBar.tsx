@@ -12,6 +12,7 @@ import {
   FileSpreadsheet,
   ChevronRight,
   ChevronDown,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { useWorkspaceStore, type Tab, type TabGroup } from '../store/workspace';
 import { confirm } from './ConfirmDialog';
@@ -32,6 +33,8 @@ function TabIcon({ fileType }: { fileType: string }) {
       return <Code2 size={12} className="shrink-0" style={{ color: '#fb923c' }} />;
     case 'csv':
       return <FileSpreadsheet size={12} className="shrink-0" style={{ color: '#34d399' }} />;
+    case 'image':
+      return <ImageIcon size={12} className="shrink-0" style={{ color: '#38bdf8' }} />;
     default:
       return <File size={12} className="shrink-0" style={{ color: 'var(--color-text-muted)' }} />;
   }

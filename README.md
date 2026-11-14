@@ -10,6 +10,7 @@ A vault-based markdown editor and software spec system built with Tauri, React, 
 - Wiki-link suggestions (`[[`) for cross-referencing files
 - Mermaid diagram rendering
 - Excalidraw drawing support
+- Image viewer (zoom, pan, rotate, flip) and inline Markdown images
 - Tag system with colored badges
 - Full-text and filename search with regex support
 - Backlinks panel

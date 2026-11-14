@@ -181,6 +181,7 @@ function FileSection() {
       <SettingRow
         label="Include Patterns"
         description="Only files matching these patterns will be shown (e.g. *.md, *.excalidraw)"
+        stacked
       >
         <div className="space-y-2 w-full">
           <div className="flex flex-wrap gap-1.5">
@@ -506,19 +507,22 @@ function ShortcutsSection() {
 function SettingRow({
   label,
   description,
+  stacked,
   children,
 }: {
   label: string;
   description?: string;
+  /** Put the control below the label at full width (for wide controls like chip lists) */
+  stacked?: boolean;
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4">
+    <div className={stacked ? 'space-y-2' : 'flex items-start justify-between gap-4'}>
       <div className="flex-1 min-w-0">
         <div className="text-xs font-medium text-primary">{label}</div>
         {description && <div className="text-xs text-muted mt-0.5">{description}</div>}
       </div>
-      <div className="flex-shrink-0">{children}</div>
+      <div className={stacked ? undefined : 'flex-shrink-0'}>{children}</div>
     </div>
   );
 }

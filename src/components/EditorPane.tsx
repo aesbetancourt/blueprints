@@ -7,6 +7,7 @@ import { MarkdownEditor } from '../editors/MarkdownEditor';
 import { ExcalidrawEditor } from '../editors/ExcalidrawEditor';
 import { MermaidEditor } from '../editors/MermaidEditor';
 import { JsonCrackEditor } from '../editors/JsonCrackEditor';
+import { ImageViewer } from '../editors/ImageViewer';
 import { detectFormat } from '../utils/dataFormatConverter';
 import { useToastStore } from './Toast';
 
@@ -30,7 +31,18 @@ function splitFrontmatter(content: string): { frontmatter: string; body: string 
   return { frontmatter, body };
 }
 
-export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' | 'raw' }) {
+interface EditorPaneProps {
+  tab: Tab;
+  editorMode?: 'rich' | 'raw';
+}
+
+export function EditorPane({ tab, editorMode }: EditorPaneProps) {
+  // Images are binary and read-only, so they skip the text load/save pipeline
+  if (tab.fileType === 'image') return <ImageViewer key={tab.filePath} filePath={tab.filePath} />;
+  return <TextEditorPane tab={tab} editorMode={editorMode} />;
+}
+
+function TextEditorPane({ tab, editorMode }: EditorPaneProps) {
   const cached = VaultService.getCached(tab.filePath);
   // For markdown, split frontmatter from cached content
   const cachedSplit = cached != null && tab.fileType === 'md' ? splitFrontmatter(cached) : null;
@@ -257,6 +269,7 @@ export function EditorPane({ tab, editorMode }: { tab: Tab; editorMode?: 'rich' 
       editor = (
         <MarkdownEditor
           key={tab.filePath}
+          filePath={tab.filePath}
           content={content}
           onChange={handleChange}
           onUserEdit={handleUserEdit}

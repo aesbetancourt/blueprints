@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createTauriStore } from '@tauri-store/zustand';
+import { IMAGE_INCLUDE_PATTERNS } from '../utils/imageFiles';
 
 export interface EditorSettings {
   fontSize: number;
@@ -80,6 +81,7 @@ const DEFAULT_FILE: FileSettings = {
     '*.yml',
     '*.xml',
     '*.csv',
+    ...IMAGE_INCLUDE_PATTERNS,
   ],
   hiddenPaths: [],
   jsonGraphMaxSizeKB: 500,
@@ -221,7 +223,14 @@ export const settingsStoreHandler = createTauriStore(
         if (state.file) {
           state.file = { ...DEFAULT_FILE, ...(state.file as FileSettings) };
           // Migrate: ensure all supported patterns exist
-          const required = ['*.json', '*.yaml', '*.yml', '*.xml', '*.csv'];
+          const required = [
+            '*.json',
+            '*.yaml',
+            '*.yml',
+            '*.xml',
+            '*.csv',
+            ...IMAGE_INCLUDE_PATTERNS,
+          ];
           const patterns = (state.file as FileSettings).includePatterns ?? [];
           const missing = required.filter((p) => !patterns.includes(p));
           if (missing.length > 0) {

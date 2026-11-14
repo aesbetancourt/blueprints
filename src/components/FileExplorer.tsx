@@ -15,6 +15,7 @@ import { useSettingsStore } from '../store/settings';
 import { confirm } from './ConfirmDialog';
 import { VaultService } from '../services/vault';
 import { mapFileEntries } from '../utils/mapFileEntries';
+import { IMAGE_INCLUDE_PATTERNS, isImageExtension } from '../utils/imageFiles';
 import { useToastStore } from './Toast';
 import { ContextMenu } from './CreateFile';
 
@@ -118,6 +119,7 @@ export function FileExplorer({
     '*.yml',
     '*.xml',
     '*.csv',
+    ...IMAGE_INCLUDE_PATTERNS,
   ];
 
   // Filter out _archive folder unless toggled on, and hidden items unless revealed
@@ -1273,6 +1275,11 @@ function FolderSmallIcon() {
 }
 
 function FileIcon({ ext }: { ext: string | undefined }) {
+  if (isImageExtension(ext)) {
+    return (
+      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#38bdf8' }} />
+    );
+  }
   switch (ext) {
     case 'md':
       return (

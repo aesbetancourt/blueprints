@@ -3,6 +3,7 @@ import { listen } from '@tauri-apps/api/event';
 import { useWorkspaceStore, type FileEntry } from '../store/workspace';
 import { VaultService } from '../services/vault';
 import { mapFileEntries } from '../utils/mapFileEntries';
+import { invalidateImage, isImagePath } from '../utils/imageFiles';
 
 export function useFileEvents() {
   const vaultPath = useWorkspaceStore((s: { vaultPath: string | null }) => s.vaultPath);
@@ -16,7 +17,8 @@ export function useFileEvents() {
     const unlisteners: Array<() => void> = [];
 
     const setup = async () => {
-      const refresh = async () => {
+      const refresh = async (event: { payload: { path: string } }) => {
+        if (isImagePath(event.payload.path)) invalidateImage(event.payload.path);
         const tree = await VaultService.listFiles(vaultPath);
         setFileTree(mapFileEntries(tree));
       };

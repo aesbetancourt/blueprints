@@ -22,6 +22,7 @@ import { WikiLinkSuggestion } from './extensions/WikiLinkSuggestion';
 import { VariableSuggestion } from './extensions/VariableSuggestion';
 import { SlashCommands } from './extensions/SlashCommands';
 import { MermaidCodeBlock } from './extensions/MermaidBlock';
+import { VaultImage } from './extensions/VaultImage';
 import { useWorkspaceStore } from '../store/workspace';
 import { useSettingsStore } from '../store/settings';
 import { MarkdownToolbar } from './MarkdownToolbar';
@@ -57,6 +58,8 @@ function resolveWikiLink(name: string, fileTree: FileEntry[]): string | null {
 type EditorMode = 'rich' | 'raw';
 
 interface MarkdownEditorProps {
+  /** Path of the note; used to resolve relative image paths */
+  filePath?: string;
   content: string;
   onChange: (content: string) => void;
   onUserEdit?: (content: string) => void;
@@ -64,6 +67,7 @@ interface MarkdownEditorProps {
 }
 
 export function MarkdownEditor({
+  filePath = '',
   content,
   onChange,
   onUserEdit,
@@ -87,6 +91,7 @@ export function MarkdownEditor({
       TableHeader,
       TaskList,
       TaskItem.configure({ nested: true }),
+      VaultImage.configure({ filePath }),
       HighlightMark.configure({ multicolor: true }),
       Placeholder.configure({
         placeholder: 'Start writing...',
@@ -180,6 +185,12 @@ export function MarkdownEditor({
     }
   };
 
+  // Open vault images in the image viewer tab
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    const imageEl = (e.target as HTMLElement).closest('[data-image-path]') as HTMLElement | null;
+    if (imageEl?.dataset.imagePath) openFile(imageEl.dataset.imagePath);
+  };
+
   return (
     <div className="h-full flex flex-col bg-surface-0 relative">
       {mode === 'rich' && <MarkdownToolbar editor={editor} />}
@@ -190,6 +201,7 @@ export function MarkdownEditor({
           <div
             className="flex-1 overflow-y-auto min-h-0 relative"
             onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
             style={{
               fontSize: `${editorSettings.fontSize}px`,
               fontFamily: editorSettings.fontFamily,
