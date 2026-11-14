@@ -9,6 +9,10 @@
   Plain files in a folder. Git built in. No account, no cloud, no lock-in.
 </p>
 
+<p align="center">
+  <a href="https://aesbetancourt.github.io/blueprints/"><b>Try the interactive demo</b></a>
+</p>
+
 ---
 
 ## What it is
@@ -159,6 +163,7 @@ src/                 React frontend
 src-tauri/           Rust backend
   src/commands/      File, git, vault, and system commands
 docs/                Architecture and Tauri notes
+site/                GitHub Pages showcase (static HTML)
 ```
 
 ## Tech stack

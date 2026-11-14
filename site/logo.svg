@@ -1,0 +1,103 @@
+<svg width="100%" viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg" style="">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Blueprint app logo</title>
+
+  <defs>
+    <clipPath id="ic">
+      <rect x="30" y="30" width="620" height="620" rx="138"/>
+    </clipPath>
+    <clipPath id="bg-clip">
+      <rect x="30" y="30" width="620" height="620" rx="138"/>
+    </clipPath>
+
+    <!-- Grid patterns -->
+    <pattern id="g-sm" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" stroke="#5b92e0" stroke-width="0.38"/>
+    </pattern>
+    <pattern id="g-lg" width="100" height="100" patternUnits="userSpaceOnUse">
+      <rect width="100" height="100" fill="url(#g-sm)"/>
+      <path d="M100 0H0V100" fill="none" stroke="#5b92e0" stroke-width="1.1"/>
+    </pattern>
+
+    <!-- Background gradient: richer at top, darker at bottom -->
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1250a4"/>
+      <stop offset="100%" stop-color="#092c6e"/>
+    </linearGradient>
+
+    <!-- Document face gradient: white top, very subtle cool tint at bottom -->
+    <linearGradient id="doc-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e8eef8"/>
+    </linearGradient>
+
+    <!-- Fold triangle gradient -->
+    <linearGradient id="fold-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c8d6ee"/>
+      <stop offset="100%" stop-color="#b0c2e0"/>
+    </linearGradient>
+
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-15%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#061b4a" flood-opacity="0.55"/>
+    </filter>
+
+    <!-- Fold inner shadow -->
+    <filter id="fold-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="#8aaad4" flood-opacity="0.4"/>
+    </filter>
+
+    
+  <mask id="imagine-text-gaps-lku4xv" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="680" height="680" fill="white"/><rect x="250.89453125" y="219" width="186.2109375" height="349" fill="black" rx="2"/></mask></defs>
+
+  <!-- Background -->
+  <rect x="30" y="30" width="620" height="620" rx="138" fill="url(#bg-grad)" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Grid on background -->
+  <rect x="30" y="30" width="620" height="620" fill="url(#g-lg)" clip-path="url(#bg-clip)" opacity="0.9" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.9;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Subtle vignette overlay -->
+  <radialGradient id="vig" cx="50%" cy="50%" r="70%" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <stop offset="0%" stop-color="transparent" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <stop offset="100%" stop-color="#061b4a" stop-opacity="0.45" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </radialGradient>
+  <rect x="30" y="30" width="620" height="620" rx="138" fill="url(#vig)" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <g clip-path="url(#ic)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+
+    <!-- Document — white, centered, with drop shadow -->
+    <!-- Doc path: top-left origin 188,118 — width 304, fold 88px, height 444 -->
+    <g filter="url(#shadow)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+      <path d="M200 118 L416 118 L504 206 L504 562 Q504 574 492 574 L200 574 Q188 574 188 562 L188 130 Q188 118 200 118 Z" fill="url(#doc-grad)" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    </g>
+
+    <!-- Subtle horizontal lines inside document — like lined paper / blueprint feel -->
+    <g stroke="#c8d4ec" stroke-width="0.7" opacity="0.5" style="fill:rgb(0, 0, 0);stroke:rgb(200, 212, 236);color:rgb(255, 255, 255);stroke-width:0.7px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.5;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+      <line x1="210" y1="260" x2="490" y2="260" mask="url(#imagine-text-gaps-lku4xv)" style="fill:rgb(0, 0, 0);stroke:rgb(200, 212, 236);color:rgb(255, 255, 255);stroke-width:0.7px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <line x1="210" y1="290" x2="490" y2="290" mask="url(#imagine-text-gaps-lku4xv)" style="fill:rgb(0, 0, 0);stroke:rgb(200, 212, 236);color:rgb(255, 255, 255);stroke-width:0.7px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <line x1="210" y1="320" x2="490" y2="320" mask="url(#imagine-text-gaps-lku4xv)" style="fill:rgb(0, 0, 0);stroke:rgb(200, 212, 236);color:rgb(255, 255, 255);stroke-width:0.7px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <line x1="210" y1="530" x2="490" y2="530" mask="url(#imagine-text-gaps-lku4xv)" style="fill:rgb(0, 0, 0);stroke:rgb(200, 212, 236);color:rgb(255, 255, 255);stroke-width:0.7px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+      <line x1="210" y1="550" x2="490" y2="550" mask="url(#imagine-text-gaps-lku4xv)" style="fill:rgb(0, 0, 0);stroke:rgb(200, 212, 236);color:rgb(255, 255, 255);stroke-width:0.7px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    </g>
+
+    <!-- Fold shadow line -->
+    <line x1="416" y1="118" x2="504" y2="206" stroke="#a0b8d8" stroke-width="1" opacity="0.6" style="fill:rgb(0, 0, 0);stroke:rgb(160, 184, 216);color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.6;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    <!-- Fold triangle -->
+    <path d="M416 118 L504 206 L416 206 Z" fill="url(#fold-grad)" filter="url(#fold-shadow)" style="stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    <!-- Fold crease border -->
+    <path d="M416 118 L416 206 L504 206" fill="none" stroke="#a8bcd8" stroke-width="1.5" stroke-linejoin="round" style="fill:none;stroke:rgb(168, 188, 216);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    <!-- Document outer stroke — very thin, barely visible -->
+    <path d="M200 118 L416 118 L504 206 L504 562 Q504 574 492 574 L200 574 Q188 574 188 562 L188 130 Q188 118 200 118 Z" fill="none" stroke="#b0c4de" stroke-width="1.5" stroke-linejoin="round" style="fill:none;stroke:rgb(176, 196, 222);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    <!-- B lettermark — deep blue, optically centered below fold -->
+    <text x="344" y="496" text-anchor="middle" font-family="'JetBrains Mono', 'Consolas', monospace" font-weight="800" font-size="296" fill="#0e3d8a" opacity="0.95" style="fill:rgb(14, 61, 138);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.95;font-family:&quot;JetBrains Mono&quot;, Consolas, monospace;font-size:296px;font-weight:800;text-anchor:middle;dominant-baseline:auto">B</text>
+
+  </g>
+
+  <!-- Outer border — two rings for depth -->
+  <rect x="30" y="30" width="620" height="620" rx="138" fill="none" stroke="white" stroke-width="1.5" opacity="0.12" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.12;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <rect x="30" y="30" width="620" height="620" rx="138" fill="none" stroke="#5a9af5" stroke-width="5" opacity="0.85" style="fill:none;stroke:rgb(90, 154, 245);color:rgb(255, 255, 255);stroke-width:5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.85;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+</svg>
