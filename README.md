@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://aesbetancourt.github.io/blueprints/"><b>Try the interactive demo</b></a>
+  <a href="https://aesbetancourt.dev/blueprints/"><b>Try the interactive demo</b></a>
 </p>
 
 ---
@@ -112,7 +112,7 @@ The in-app Help panel documents every feature.
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 18 or later
+- [Node.js](https://nodejs.org/) 26 LTS (24 LTS also works). The repo pins 26 in `mise.toml`.
 - [pnpm](https://pnpm.io/) 9 or later (the repo rejects npm and yarn)
 - [Rust](https://www.rust-lang.org/tools/install) stable toolchain
 - [Tauri system dependencies](https://v2.tauri.app/start/prerequisites/) for your OS
