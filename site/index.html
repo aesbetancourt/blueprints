@@ -1149,6 +1149,23 @@
         gap: 16px;
         flex-wrap: wrap;
       }
+      footer .end {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      footer .version {
+        padding: 2px 8px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--text-secondary);
+        font: 12px var(--mono);
+        text-decoration: none;
+      }
+      footer .version:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
 
       /* ---------- Responsive ---------- */
       @media (max-width: 1000px) {
@@ -1599,7 +1616,15 @@
     <footer>
       <div class="wrap">
         <span>Blueprints is a personal project, built with Tauri, React, and TipTap.</span>
-        <a href="https://github.com/aesbetancourt/blueprints">github.com/aesbetancourt/blueprints</a>
+        <span class="end">
+          <a href="https://github.com/aesbetancourt/blueprints">github.com/aesbetancourt/blueprints</a>
+          <a
+            class="version"
+            href="https://github.com/aesbetancourt/blueprints/tree/v0.2.0"
+            title="Current version"
+            >v0.2.0</a
+          >
+        </span>
       </div>
     </footer>
 

@@ -1,6 +1,6 @@
 [package]
 name = "Blueprints"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local-first desktop app for software specs, notes, and diagrams"
 authors = []
 edition = "2021"
