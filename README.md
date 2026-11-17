@@ -27,14 +27,14 @@ It never stores content in a database, so any other tool can read and change the
 
 ## Why I built it
 
-| Need                            | How Blueprints handles it                                                                    |
-| ------------------------------- | -------------------------------------------------------------------------------------------- |
-| Own my files                    | Everything is plain `.md`, `.mermaid`, `.excalidraw`, `.json`, `.yaml`, `.csv`, or an image. |
-| Version history                 | Git status, stage, commit, diff, and log are in the sidebar.                                 |
-| One place for docs and diagrams | Markdown, Mermaid, Excalidraw, data files, and images open in tabs side by side.             |
-| Start specs fast                | 34 templates for specs, ADRs, RFCs, diagrams, data files, and journals.                      |
-| Write for AI coding agents      | The status bar shows an estimated token count for the open document.                         |
-| Stay fast and light             | Tauri v2 uses the OS WebView and a Rust backend, not a bundled browser.                      |
+| Need                            | How Blueprints handles it                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Own my files                    | Everything is plain `.md`, `.typ`, `.mermaid`, `.excalidraw`, `.json`, `.yaml`, `.csv`, or an image. |
+| Version history                 | Git status, stage, commit, diff, and log are in the sidebar.                                         |
+| One place for docs and diagrams | Markdown, Typst, Mermaid, Excalidraw, data files, and images open in tabs side by side.              |
+| Start specs fast                | 36 templates for specs, ADRs, RFCs, diagrams, data files, and journals.                              |
+| Write for AI coding agents      | The status bar shows an estimated token count for the open document.                                 |
+| Stay fast and light             | Tauri v2 uses the OS WebView and a Rust backend, not a bundled browser.                              |
 
 Obsidian and Notion can do parts of this.
 I wanted a tool that is spec-first, developer-focused, and fully under my control.
@@ -64,6 +64,7 @@ For full detail, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/TAUR
 - Slash commands (`/` at line start), tables, task lists, highlights, and find in file
 - Wiki links (`[[`), with backlinks and outgoing-links panels
 - Variables (`{{today}}`, `{{now}}`, custom values), resolved in templates on create
+- Typst documents with a live page preview, inline errors, and PDF export. The compiler is built in.
 - Mermaid diagrams with live preview, also inline in Markdown
 - Excalidraw canvases
 - JSON, YAML, XML, and CSV with a code editor and an interactive graph view
@@ -92,19 +93,21 @@ Files save automatically when I switch tabs or leave the app. `⌘S` saves at on
 
 ### Shortcuts
 
-| Shortcut      | Action                      |
-| ------------- | --------------------------- |
-| `⌘P`          | Command palette (open file) |
-| `⌘N` / `⌘⇧N`  | New file / quick note       |
-| `⌘⇧F`         | Search in files             |
-| `⌘F`          | Find in file                |
-| `⌘⇧G`         | Git panel                   |
-| `⌘J`          | Scratch pad                 |
-| `⌘B`          | Toggle sidebar              |
-| `⌘W`          | Close tab                   |
-| `⌘⇧[` / `⌘⇧]` | Previous / next tab         |
-| `⌘,`          | Settings                    |
-| `⌘?`          | Shortcut reference          |
+| Shortcut           | Action                            |
+| ------------------ | --------------------------------- |
+| `⌘P`               | Command palette (open file)       |
+| `⌘N` / `⌘⇧N`       | New file / quick note             |
+| `⌘⇧F`              | Search in files                   |
+| `⌘F`               | Find in file                      |
+| `⌘⇧G`              | Git panel                         |
+| `⌘J`               | Scratch pad                       |
+| `⌘B`               | Toggle sidebar (outside editors)  |
+| `⌘B` / `⌘I` / `⌘K` | Bold / italic / link (in editors) |
+| `⌘Z` / `⌘⇧Z`       | Undo / redo                       |
+| `⌘W`               | Close tab                         |
+| `⌘⇧[` / `⌘⇧]`      | Previous / next tab               |
+| `⌘,`               | Settings                          |
+| `⌘?`               | Shortcut reference                |
 
 The in-app Help panel documents every feature.
 
@@ -155,20 +158,20 @@ A Husky pre-commit hook runs lint-staged on changed files.
 ```
 src/                 React frontend
   components/        Shell, sidebar, panels, modals
-  editors/           Markdown, Mermaid, Excalidraw, JSON graph, image viewer
+  editors/           Markdown, Typst, Mermaid, Excalidraw, JSON graph, image viewer
     extensions/      TipTap extensions (slash commands, wiki links, images)
   store/             Zustand stores (workspace, settings, git, annotations)
-  services/          Tauri IPC wrappers (vault, git)
+  services/          Tauri IPC wrappers (vault, git, typst)
   data/              Built-in templates
 src-tauri/           Rust backend
-  src/commands/      File, git, vault, and system commands
+  src/commands/      File, git, vault, system, and Typst commands
 docs/                Architecture and Tauri notes
 site/                GitHub Pages showcase (static HTML)
 ```
 
 ## Tech stack
 
-React 19 · TypeScript · Vite · Tailwind CSS · TipTap v3 · Zustand · CodeMirror · Mermaid · Excalidraw · Tauri v2 (Rust)
+React 19 · TypeScript · Vite · Tailwind CSS · TipTap v3 · Zustand · CodeMirror · Mermaid · Excalidraw · Typst · Tauri v2 (Rust)
 
 ## Status
 

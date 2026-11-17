@@ -47,6 +47,7 @@
         --ft-json: #a78bfa;
         --ft-yaml: #f472b6;
         --ft-image: #38bdf8;
+        --ft-typst: #22d3ee;
 
         --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -739,6 +740,58 @@
         padding: 16px;
         background: var(--surface-0);
       }
+      .code .h {
+        color: #e5c07b;
+        font-weight: 600;
+      }
+      .code .f {
+        color: #61afef;
+      }
+      /* Typst preview: a typeset page, like the real compiler output */
+      .preview .page {
+        width: 100%;
+        max-width: 340px;
+        aspect-ratio: 1 / 1.414;
+        padding: 30px 32px;
+        background: #fff;
+        color: #111;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+        font: 10.5px/1.5 'Libertinus Serif', 'Iowan Old Style', Georgia, serif;
+        overflow: hidden;
+      }
+      .page h4,
+      .page h5 {
+        margin: 0 0 6px;
+        font-weight: 700;
+      }
+      .page h4 {
+        font-size: 15px;
+      }
+      .page h5 {
+        margin-top: 12px;
+        font-size: 12px;
+      }
+      .page h4 span,
+      .page h5 span {
+        margin-right: 6px;
+      }
+      .page p {
+        margin: 0 0 8px;
+        text-align: justify;
+      }
+      .page .math {
+        text-align: center;
+        font-style: normal;
+        margin: 10px 0;
+      }
+      .page table {
+        margin: 10px auto 0;
+        border-collapse: collapse;
+      }
+      .page td {
+        border: 0.6px solid #111;
+        padding: 3px 8px;
+      }
       .preview svg {
         width: 100%;
         max-width: 440px;
@@ -1310,8 +1363,9 @@
             <h2>A vault is just a folder.</h2>
             <p>
               Point Blueprints at any directory. It shows the files as a tree and opens each one in
-              the right editor. Markdown opens in a rich editor, <code>.mermaid</code> files open
-              with a live preview, and <code>.excalidraw</code> files open as a canvas.
+              the right editor. Markdown opens in a rich editor, <code>.typ</code> files compile to
+              typeset pages as you type, <code>.mermaid</code> files open with a live preview, and
+              <code>.excalidraw</code> files open as a canvas.
             </p>
             <p>
               Nothing is hidden in a database. Your editor, <code>grep</code>, and coding agents
@@ -1329,7 +1383,8 @@
 │   └── note-2026-11-14-0932.md
 ├── <span class="dir">specs/</span>
 │   ├── offline-sync.md
-│   └── auth-flow.md
+│   ├── auth-flow.md
+│   └── sync-brief.typ
 ├── <span class="dir">decisions/</span>
 │   └── 0007-use-crdt.md
 ├── <span class="dir">diagrams/</span>
@@ -1362,13 +1417,20 @@
                   <dd>Edit Markdown visually, or switch to the source with one click.</dd>
                 </div>
                 <div class="help-row">
+                  <dt>Typst</dt>
+                  <dd>
+                    Typeset documents with a live page preview, inline errors, and PDF export. The
+                    compiler is built in, so you install nothing.
+                  </dd>
+                </div>
+                <div class="help-row">
                   <dt>Slash commands</dt>
                   <dd>Type <kbd>/</kbd> at the start of a line to add headings, tasks, tables, or code.</dd>
                 </div>
                 <div class="help-row">
                   <dt>Templates</dt>
                   <dd>
-                    Start from 34 templates, such as Feature Spec, ADR, RFC, Runbook, and Dev Log.
+                    Start from 36 templates, such as Feature Spec, ADR, RFC, Runbook, and Dev Log.
                   </dd>
                 </div>
                 <div class="help-row">
@@ -1556,6 +1618,7 @@
           mermaid: { label: 'Mermaid', color: 'var(--ft-mermaid)' },
           excalidraw: { label: 'Excalidraw', color: 'var(--ft-excalidraw)' },
           yaml: { label: 'YAML', color: 'var(--ft-yaml)' },
+          typst: { label: 'Typst', color: 'var(--ft-typst)' },
           image: { label: 'Image', color: 'var(--ft-image)' },
         };
 
@@ -1619,6 +1682,28 @@ Sign-in uses a device code. The desktop app shows a short code, and the user con
 - [ ] Revoke tokens from settings
 
 The sync worker in [[offline-sync]] refreshes tokens before each replay.
+`,
+          },
+          'specs/sync-brief.typ': {
+            type: 'typst',
+            raw: `// One-page brief for the sync review
+#set page(paper: "a4", margin: 2cm)
+#set heading(numbering: "1.")
+
+= Offline sync brief
+
+Field users lose edits when the signal drops.
+We queue writes in a *local log* and replay them in order.
+
+== Cost of a replay
+$ t = n dot (r + l) $
+
+#table(
+  columns: 2,
+  [*Case*], [*Behavior*],
+  [Offline write], [Append to log],
+  [Reconnect], [Replay in order],
+)
 `,
           },
           'decisions/0007-use-crdt.md': {
@@ -1797,6 +1882,23 @@ log:
             .replace(/^(\s*)(sequenceDiagram|participant|Note over)/, '$1<span class="k">$2</span>')
             .replace(/(-&gt;&gt;|--&gt;&gt;)/g, '<span class="p">$1</span>')
             .replace(/ as /, ' <span class="k">as</span> ');
+        const hlTypst = (l) => {
+          if (l.startsWith('//')) return `<span class="c">${l}</span>`;
+          if (/^=+ /.test(l)) return `<span class="h">${l}</span>`;
+          return l.replace(
+            /(#(?:set|let|show|import)\b)|(#[a-z]+)|("[^"]*")|(\$)|(\*[^*]+\*)|(\b\d+(?:cm|pt)?\b)/g,
+            (m, kw, fn, str, dollar, strong) =>
+              kw
+                ? `<span class="k">${kw}</span>`
+                : fn
+                  ? `<span class="f">${fn}</span>`
+                  : str || dollar
+                    ? `<span class="s">${m}</span>`
+                    : strong
+                      ? `<b>${strong}</b>`
+                      : `<span class="n">${m}</span>`,
+          );
+        };
         const hlYaml = (l) =>
           l.startsWith('#')
             ? `<span class="c">${l}</span>`
@@ -1828,6 +1930,18 @@ log:
     <text class="mt" x="142" y="276">synced</text><line class="msg" x1="220" y1="284" x2="67" y2="284" stroke-dasharray="5 4" marker-end="url(#ah)"/>
   </g>
 </svg>`;
+
+        const TYPST_PAGE = `<div class="page" role="img" aria-label="Typeset page rendered from sync-brief.typ">
+  <h4><span>1.</span>Offline sync brief</h4>
+  <p>Field users lose edits when the signal drops. We queue writes in a <b>local log</b> and replay them in order.</p>
+  <h5><span>1.1.</span>Cost of a replay</h5>
+  <p class="math"><i>t</i> = <i>n</i> · (<i>r</i> + <i>l</i>)</p>
+  <table>
+    <tr><td><b>Case</b></td><td><b>Behavior</b></td></tr>
+    <tr><td>Offline write</td><td>Append to log</td></tr>
+    <tr><td>Reconnect</td><td>Replay in order</td></tr>
+  </table>
+</div>`;
 
         const YAML_GRAPH_SVG = `<svg viewBox="0 0 440 300" role="img" aria-label="Graph view of sync.yaml">
   <style>
@@ -1883,6 +1997,8 @@ log:
           if (f.type === 'md') return mode === 'raw' ? renderRaw(f.raw) : renderMarkdown(f.raw);
           if (f.type === 'mermaid')
             return `<div class="split">${codeLines(f.raw, hlMermaid)}<div class="preview">${SEQUENCE_SVG}</div></div>`;
+          if (f.type === 'typst')
+            return `<div class="split">${codeLines(f.raw, hlTypst)}<div class="preview">${TYPST_PAGE}</div></div>`;
           if (f.type === 'yaml')
             return `<div class="split">${codeLines(f.raw, hlYaml)}<div class="preview">${YAML_GRAPH_SVG}</div></div>`;
           if (f.type === 'excalidraw')
