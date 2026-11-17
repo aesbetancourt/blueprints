@@ -11,7 +11,7 @@ pub struct FileEntry {
     pub children: Option<Vec<FileEntry>>,
 }
 
-fn validate_path(path: &str, vault_root: &str) -> Result<(), String> {
+pub(crate) fn validate_path(path: &str, vault_root: &str) -> Result<(), String> {
     let target = PathBuf::from(path);
     let root_canonical = PathBuf::from(vault_root)
         .canonicalize()
@@ -47,7 +47,7 @@ fn validate_path(path: &str, vault_root: &str) -> Result<(), String> {
     }
 }
 
-fn get_vault_root(state: &tauri::State<'_, crate::AppState>) -> Result<String, String> {
+pub(crate) fn get_vault_root(state: &tauri::State<'_, crate::AppState>) -> Result<String, String> {
     let vault = state.vault_path.lock().map_err(|e| e.to_string())?;
     vault.clone().ok_or_else(|| "No vault opened".to_string())
 }
@@ -146,6 +146,7 @@ pub async fn create_file(path: String, file_type: String, state: tauri::State<'_
         "md" => String::new(),
         "excalidraw" => "{\"type\":\"excalidraw\",\"version\":2,\"source\":\"blueprints\",\"elements\":[],\"appState\":{\"viewBackgroundColor\":\"#0f1117\"}}".to_string(),
         "mermaid" => "flowchart TD\n    Start --> End".to_string(),
+        "typst" => "= Untitled\n".to_string(),
         "json" => "{\n  \n}".to_string(),
         "yaml" => String::new(),
         "xml" => "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n  \n</root>\n".to_string(),

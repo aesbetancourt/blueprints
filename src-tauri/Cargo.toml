@@ -16,6 +16,12 @@ trash = "5"
 notify = "7"
 git2 = "0.19"
 sysinfo = "0.33"
+typst = "0.15.1"
+typst-layout = "0.15.1"
+typst-svg = "0.15.1"
+typst-pdf = "0.15.1"
+typst-kit = { version = "0.15.1", features = ["embedded-fonts", "scan-fonts", "system-files", "system-downloader", "datetime"] }
+comemo = "0.5.1"
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

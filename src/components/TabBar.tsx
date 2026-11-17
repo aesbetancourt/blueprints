@@ -13,6 +13,7 @@ import {
   ChevronRight,
   ChevronDown,
   Image as ImageIcon,
+  FileTypeIcon,
 } from 'lucide-react';
 import { useWorkspaceStore, type Tab, type TabGroup } from '../store/workspace';
 import { confirm } from './ConfirmDialog';
@@ -25,6 +26,8 @@ function TabIcon({ fileType }: { fileType: string }) {
       return <Pencil size={12} className="shrink-0" style={{ color: 'var(--color-warning)' }} />;
     case 'mermaid':
       return <Network size={12} className="shrink-0" style={{ color: 'var(--color-success)' }} />;
+    case 'typst':
+      return <FileTypeIcon size={12} className="shrink-0" style={{ color: '#22d3ee' }} />;
     case 'json':
       return <Braces size={12} className="shrink-0" style={{ color: '#a78bfa' }} />;
     case 'yaml':

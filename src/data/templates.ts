@@ -4,7 +4,7 @@ export interface Template {
   id: string;
   label: string;
   description: string;
-  fileType: 'md' | 'excalidraw' | 'mermaid' | 'json' | 'yaml' | 'xml' | 'csv';
+  fileType: 'md' | 'excalidraw' | 'mermaid' | 'typst' | 'json' | 'yaml' | 'xml' | 'csv';
   category: TemplateCategory;
   content: string;
   icon: string;
@@ -32,6 +32,16 @@ export const templates: Template[] = [
     content: 'graph TD\n    A[Start]\n',
     icon: 'flow',
     suggestedName: 'diagram-',
+  },
+  {
+    id: 'typst-blank',
+    label: 'Blank Typst Document',
+    description: 'Empty Typst document with live preview',
+    fileType: 'typst',
+    category: 'basics',
+    content: `#set page(paper: "a4", margin: 2cm)\n#set text(size: 11pt)\n#set heading(numbering: "1.")\n\n= Untitled\n\nStart writing here.\n`,
+    icon: 'doc',
+    suggestedName: 'document-',
   },
   {
     id: 'json-blank-basic',
@@ -152,6 +162,17 @@ export const templates: Template[] = [
     content: `---\ntags: [data-model, draft]\nstatus: draft\n---\n\n# Data Model: [Domain]\n\n## Overview\n\nHigh-level description of the data domain.\n\n## Entities\n\n### Entity A\n\n| Field | Type | Constraints | Description |\n|-------|------|-------------|-------------|\n| id | UUID | PK | |\n| name | string | NOT NULL | |\n| created_at | timestamp | NOT NULL | |\n\n### Entity B\n\n| Field | Type | Constraints | Description |\n|-------|------|-------------|-------------|\n| id | UUID | PK | |\n| entity_a_id | UUID | FK → Entity A | |\n\n## Relationships\n\n- Entity A has many Entity B\n- Entity B belongs to Entity A\n\n## Indexes\n\n| Table | Columns | Type | Rationale |\n|-------|---------|------|----------|\n| | | | |\n\n## Constraints & Invariants\n\n- \n\n## Migration Notes\n\n- \n`,
     icon: 'table',
     suggestedName: 'data-model-',
+  },
+
+  {
+    id: 'typst-spec',
+    label: 'Typst Spec',
+    description: 'Typeset technical spec with outline, table, and PDF export',
+    fileType: 'typst',
+    category: 'documents',
+    content: `#set document(title: "Technical Spec")\n#set page(paper: "a4", margin: 2cm, numbering: "1")\n#set text(size: 11pt)\n#set heading(numbering: "1.")\n\n#align(center)[\n  #text(size: 20pt, weight: "bold")[Technical Spec: Feature Name]\n\n  Status: Draft · #datetime.today().display()\n]\n\n#outline()\n\n= Overview\n\nDescribe the problem and the goal.\n\n= Requirements\n\n- Requirement 1\n- Requirement 2\n\n= Design\n\n#figure(\n  table(\n    columns: 3,\n    [*Component*], [*Responsibility*], [*Owner*],\n    [API], [Handle requests], [],\n    [Worker], [Process jobs], [],\n  ),\n  caption: [Components],\n)\n\n= Risks\n\n/ Risk: Mitigation.\n\n= Open Questions\n\n+ Question 1\n`,
+    icon: 'scroll',
+    suggestedName: 'spec-',
   },
 
   // --- Diagrams ---

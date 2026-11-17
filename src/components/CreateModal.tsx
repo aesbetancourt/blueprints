@@ -52,6 +52,7 @@ const TYPE_COLORS: Record<string, string> = {
   md: 'var(--color-accent)',
   mermaid: 'var(--color-success)',
   excalidraw: 'var(--color-warning)',
+  typst: '#22d3ee',
   json: '#a78bfa',
   yaml: '#f472b6',
   xml: '#fb923c',
@@ -62,6 +63,7 @@ const TYPE_LABELS: Record<string, string> = {
   md: 'Markdown',
   mermaid: 'Mermaid',
   excalidraw: 'Excalidraw',
+  typst: 'Typst',
   json: 'JSON',
 };
 
@@ -177,6 +179,7 @@ export function CreateModal({ open, onClose }: CreateModalProps) {
     md: '.md',
     excalidraw: '.excalidraw',
     mermaid: '.mermaid',
+    typst: '.typ',
     json: '.json',
     yaml: '.yaml',
     xml: '.xml',

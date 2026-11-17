@@ -6,6 +6,7 @@ import { VaultService } from '../services/vault';
 import { MarkdownEditor } from '../editors/MarkdownEditor';
 import { ExcalidrawEditor } from '../editors/ExcalidrawEditor';
 import { MermaidEditor } from '../editors/MermaidEditor';
+import { TypstEditor } from '../editors/TypstEditor';
 import { JsonCrackEditor } from '../editors/JsonCrackEditor';
 import { ImageViewer } from '../editors/ImageViewer';
 import { detectFormat } from '../utils/dataFormatConverter';
@@ -282,6 +283,16 @@ function TextEditorPane({ tab, editorMode }: EditorPaneProps) {
       break;
     case 'mermaid':
       editor = <MermaidEditor key={tab.filePath} content={content} onChange={handleUserEdit} />;
+      break;
+    case 'typst':
+      editor = (
+        <TypstEditor
+          key={tab.filePath}
+          filePath={tab.filePath}
+          content={content}
+          onChange={handleUserEdit}
+        />
+      );
       break;
     case 'json':
     case 'yaml':

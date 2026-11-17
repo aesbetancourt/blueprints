@@ -20,6 +20,7 @@ pub fn run() {
         .manage(AppState {
             vault_path: Mutex::new(None),
         })
+        .manage(commands::typst::TypstState::default())
         .setup(|app| {
             // Custom menu without Cmd+N to avoid intercepting our shortcut
             let quit = MenuItem::with_id(app, "quit", "Quit", true, Some("CmdOrCtrl+Q"))?;
@@ -73,6 +74,8 @@ pub fn run() {
             commands::git::git_log,
             commands::git::git_branches,
             commands::system::get_system_stats,
+            commands::typst::compile_typst,
+            commands::typst::export_typst_pdf,
             commands::state::get_store_value,
             commands::state::get_store_state,
             commands::state::set_store_value,

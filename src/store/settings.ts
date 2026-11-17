@@ -76,6 +76,7 @@ const DEFAULT_FILE: FileSettings = {
     '*.md',
     '*.excalidraw',
     '*.mermaid',
+    '*.typ',
     '*.json',
     '*.yaml',
     '*.yml',
@@ -224,6 +225,7 @@ export const settingsStoreHandler = createTauriStore(
           state.file = { ...DEFAULT_FILE, ...(state.file as FileSettings) };
           // Migrate: ensure all supported patterns exist
           const required = [
+            '*.typ',
             '*.json',
             '*.yaml',
             '*.yml',

@@ -114,6 +114,7 @@ export function FileExplorer({
     '*.md',
     '*.excalidraw',
     '*.mermaid',
+    '*.typ',
     '*.json',
     '*.yaml',
     '*.yml',
@@ -1301,6 +1302,10 @@ function FileIcon({ ext }: { ext: string | undefined }) {
           className="w-2 h-2 rounded-full shrink-0"
           style={{ backgroundColor: 'var(--color-success)' }}
         />
+      );
+    case 'typ':
+      return (
+        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#22d3ee' }} />
       );
     case 'json':
       return (

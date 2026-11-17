@@ -3,7 +3,16 @@ import { createTauriStore } from '@tauri-store/zustand';
 import { VaultService } from '../services/vault';
 import { isImagePath, loadImage } from '../utils/imageFiles';
 
-export type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json' | 'yaml' | 'xml' | 'csv' | 'image';
+export type FileType =
+  | 'md'
+  | 'excalidraw'
+  | 'mermaid'
+  | 'typst'
+  | 'json'
+  | 'yaml'
+  | 'xml'
+  | 'csv'
+  | 'image';
 
 export interface TabGroup {
   id: string;
@@ -97,6 +106,7 @@ interface WorkspaceState {
 function getFileType(path: string): FileType {
   if (path.endsWith('.excalidraw')) return 'excalidraw';
   if (path.endsWith('.mermaid')) return 'mermaid';
+  if (path.endsWith('.typ')) return 'typst';
   if (path.endsWith('.json')) return 'json';
   if (path.endsWith('.yaml') || path.endsWith('.yml')) return 'yaml';
   if (path.endsWith('.xml')) return 'xml';

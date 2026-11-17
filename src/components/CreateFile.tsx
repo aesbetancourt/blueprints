@@ -6,7 +6,7 @@ import { mapFileEntries } from '../utils/mapFileEntries';
 import { useToastStore } from './Toast';
 import { templates, type Template } from '../data/templates';
 
-type FileType = 'md' | 'excalidraw' | 'mermaid' | 'json';
+type FileType = 'md' | 'excalidraw' | 'mermaid' | 'typst' | 'json';
 
 interface NewFileMenuProps {
   targetDir?: string;
@@ -51,6 +51,7 @@ function NewFileMenu({ targetDir, onClose, position }: NewFileMenuProps) {
     md: '.md',
     excalidraw: '.excalidraw',
     mermaid: '.mermaid',
+    typst: '.typ',
     json: '.json',
   };
 
@@ -171,6 +172,13 @@ function NewFileMenu({ targetDir, onClose, position }: NewFileMenuProps) {
               style={{ backgroundColor: 'var(--color-success)' }}
             />
             Mermaid
+          </button>
+          <button
+            onClick={() => handleTypeSelect('typst')}
+            className="w-full text-left px-3 py-2 text-sm text-secondary hover:bg-surface-2 hover:text-primary flex items-center gap-2.5"
+          >
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: '#22d3ee' }} />
+            Typst
           </button>
           <button
             onClick={() => handleTypeSelect('json')}
