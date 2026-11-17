@@ -25,11 +25,20 @@ const sections = [
     ],
   },
   {
-    title: 'Editor (Markdown)',
+    title: 'Editor (Markdown and Typst)',
     shortcuts: [
+      { label: 'Undo', keys: ['⌘', 'Z'] },
+      { label: 'Redo', keys: ['⌘', '⇧', 'Z'] },
       { label: 'Bold', keys: ['⌘', 'B'] },
       { label: 'Italic', keys: ['⌘', 'I'] },
       { label: 'Insert Link', keys: ['⌘', 'K'] },
+    ],
+  },
+  {
+    title: 'Editor (Typst)',
+    shortcuts: [
+      { label: 'Toggle Comment', keys: ['⌘', '/'] },
+      { label: 'Find', keys: ['⌘', 'F'] },
     ],
   },
 ];

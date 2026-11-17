@@ -175,13 +175,6 @@ export function Shell() {
         return;
       }
 
-      // Cmd+B - toggle sidebar
-      if (meta && !e.shiftKey && e.key === 'b') {
-        e.preventDefault();
-        toggleSidebar();
-        return;
-      }
-
       // Cmd+, - settings
       if (meta && !e.shiftKey && e.key === ',') {
         e.preventDefault();
@@ -208,7 +201,20 @@ export function Shell() {
     };
     window.addEventListener('keydown', handler, true);
     return () => window.removeEventListener('keydown', handler, true);
-  }, [activeTabId, closeTab, nextTab, prevTab, openTabs, toggleSidebar, createQuickNote]);
+  }, [activeTabId, closeTab, nextTab, prevTab, openTabs, createQuickNote]);
+
+  // Cmd+B - toggle sidebar. Runs after editors, so Cmd+B in an editor means Bold.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) return;
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'b') {
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [toggleSidebar]);
 
   if (!vaultPath) {
     return <VaultSelector />;
